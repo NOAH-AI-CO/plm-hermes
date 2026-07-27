@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   deploy-client-hermes:
-    runs-on: [self-hosted, linux, x64, yiyong-client-prod]
+    runs-on: [self-hosted, linux, x64, yiyong-client]
     environment:
       name: yiyong-client-production
     concurrency:
