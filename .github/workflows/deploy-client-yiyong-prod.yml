@@ -1,0 +1,37 @@
+name: Deploy Client Hermes WebUI yiyong-prod
+
+on:
+  push:
+    branches: [yiyong-prod]
+    paths-ignore:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-client-hermes:
+    runs-on: [self-hosted, linux, x64, yiyong-client-prod]
+    environment:
+      name: yiyong-client-production
+    concurrency:
+      group: yiyong-client-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Build Client Hermes WebUI image
+        run: |
+          set -euo pipefail
+          docker buildx build --pull --load \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --label 'io.yiyong.deployment-target=client' \
+            --tag "yiyong-source/plm-webui:$GITHUB_SHA" \
+            --file webui/Dockerfile.client webui
+      - name: Deploy Client Hermes WebUI service
+        run: |
+          set -euo pipefail
+          sudo /usr/local/sbin/yiyong-platform-target client source-deploy-component \
+            "$GITHUB_WORKSPACE" plm-hermes "$GITHUB_SHA" "plm-hermes-${GITHUB_SHA::12}"
