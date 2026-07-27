@@ -1,0 +1,34 @@
+Excel File: Paper-Figures-Data_2025.03_Noah.xlsx
+==================================================
+
+Columns:
+Unnamed: 0, Unnamed: 1, Unnamed: 2, Unnamed: 3, Unnamed: 4
+
+Data Summary:
+Total rows: 76
+Total columns: 5
+
+First 10 rows of data:
+------------------------------
+Row 6: {'Unnamed: 2': 'SCB-1019T', 'Unnamed: 3': 'AREXVY', 'Unnamed: 4': 'Placebo'}
+Row 8: {'Unnamed: 1': 'Any Local Reaction', 'Unnamed: 2': 0.167, 'Unnamed: 3': 0.767, 'Unnamed: 4': 0}
+Row 9: {'Unnamed: 1': 'UL', 'Unnamed: 2': 0.347, 'Unnamed: 3': 0.901, 'Unnamed: 4': 0.308}
+Row 10: {'Unnamed: 1': 'LL', 'Unnamed: 2': 0.056, 'Unnamed: 3': 0.577, 'Unnamed: 4': 0}
+
+Data Types:
+------------------------------
+Unnamed: 0: float64
+Unnamed: 1: object
+Unnamed: 2: object
+Unnamed: 3: object
+Unnamed: 4: object
+
+File Classification Information:
+------------------------------
+This is an Excel data file containing structured data.
+Category: DATA_FILE
+Format: Excel spreadsheet
+Content: Tabular data with multiple columns and rows
+Contains 56 rows with actual data
+Numeric columns: Unnamed: 0
+Text columns: Unnamed: 1, Unnamed: 2, Unnamed: 3, Unnamed: 4

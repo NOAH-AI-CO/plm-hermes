@@ -1,0 +1,68 @@
+services:
+  hermes-agent:
+    image: hermes-agent:pinned
+    container_name: plm-hermes-agent
+    command: gateway run
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    volumes:
+      - ./hermes-home:/home/hermes/.hermes
+    environment:
+      - HERMES_HOME=/home/hermes/.hermes
+      # 网关内部共享密钥: 从 deploy/.env 读(gitignore, git pull 不会覆盖), 4 处自动同值
+      - API_SERVER_KEY=${GATEWAY_KEY:?请在 deploy/.env 设置 GATEWAY_KEY, 见 deploy/.env.example}
+      - API_SERVER_HOST=0.0.0.0
+      - API_SERVER_PORT=8642
+      - HERMES_UID=1000
+      - HERMES_GID=1000
+      - HERMES_API_SERVER_KEY=${GATEWAY_KEY:?请在 deploy/.env 设置 GATEWAY_KEY, 见 deploy/.env.example}
+    restart: unless-stopped
+    networks: [plm-net]
+
+  hermes-webui:
+    image: plm-hermes-webui:latest
+    container_name: plm-hermes-webui
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    volumes:
+      - ./hermes-home:/home/hermeswebui/.hermes
+      - ./hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
+      - ../webui/api/auth.py:/apptoo/api/auth.py:ro
+    environment:
+      - HERMES_HOME=/home/hermeswebui/.hermes
+      - HERMES_WEBUI_AGENT_DIR=/home/hermeswebui/.hermes/hermes-agent
+      - PYTHONPATH=/home/hermeswebui/.hermes/hermes-agent
+      - HERMES_CONFIG_PATH=/home/hermeswebui/.hermes/config.yaml
+      - HERMES_WEBUI_HOST=0.0.0.0
+      - HERMES_WEBUI_PORT=8787
+      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+      - HERMES_WEBUI_EXTENSION_DIR=/home/hermeswebui/.hermes/webui/extensions/noah
+      - HERMES_WEBUI_EXTENSION_MANIFEST=manifest.json
+      - HERMES_DJANGO_URL=http://host.docker.internal:8101,http://host.docker.internal:8102
+      - HERMES_WEBUI_TRUST_FORWARDED_PROTO=1
+      - WANTED_UID=1000
+      - WANTED_GID=1000
+      - HERMES_LLM_BACKEND=hermes
+      - HERMES_OPENAI_BASE=http://hermes-agent:8642/v1
+      - HERMES_OPENAI_MODEL=hermes-agent
+      - HERMES_API_SERVER_KEY=${GATEWAY_KEY:?请在 deploy/.env 设置 GATEWAY_KEY, 见 deploy/.env.example}
+      - HERMES_LLM_URL=http://hermes-agent:8642/v1/chat/completions
+      - HERMES_LLM_MODEL=hermes-agent
+      - HERMES_LLM_KEY=${GATEWAY_KEY:?请在 deploy/.env 设置 GATEWAY_KEY, 见 deploy/.env.example}
+      - HERMES_AGENT_TURN_TIMEOUT_SECONDS=900
+      - HERMES_STREAM_WALL_TIMEOUT_SECONDS=900
+    depends_on: [hermes-agent]
+    restart: unless-stopped
+    networks: [plm-net]
+
+  plm-nginx:
+    image: nginx:alpine
+    container_name: plm-nginx
+    depends_on: [hermes-webui]
+    ports: ["8090:80"]
+    volumes:
+      - ./plm-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    networks: [plm-net]
+
+networks:
+  plm-net:
+    name: plm-net

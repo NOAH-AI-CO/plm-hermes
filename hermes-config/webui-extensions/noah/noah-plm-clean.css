@@ -1,0 +1,39 @@
+/*
+ * Noah PLM 发送区停止键样式。
+ * (思考过程/工具条改为"通俗化"而非隐藏,见 noah-plm-composer.js 的 humanize 逻辑)
+ */
+
+/* 避免重复:原生发送键在"空输入+流式"时会变成停止方块;隐藏它,只保留下面带文字的"停止"。 */
+#btnSend.stop { display: none !important; }
+
+/* ── 工具步骤通俗化:被 humanize 的条目只显示友好中文,隐藏 curl/技能/JSON 原文 ── */
+.tool-card-row.noah-tool-humanized > *:not(.noah-tool-friendly) { display: none !important; }
+.noah-tool-friendly {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  color: #0f7a6e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── 停止生成:流式时常驻发送区,一键中止 agent ── */
+#noahStopBtn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  margin-right: 8px;
+  padding: 0 14px;
+  height: 36px;
+  border: none;
+  border-radius: 18px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+#noahStopBtn:hover { background: #d13438; }
+#noahStopBtn svg { display: block; }

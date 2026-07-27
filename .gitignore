@@ -1,0 +1,35 @@
+# secrets / envs
+.env
+*.env
+!*.env.example
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+# data (migrate via elasticdump, not git)
+plm_agent/agent/patient_like_me/v1/es/*.json
+plm_agent/logs/
+*.log
+*.rdb
+dump.rdb
+# node / caches
+node_modules/
+.pytest_cache/
+.DS_Store
+# secret config (mount at runtime, never commit)
+plm_agent/api.json
+plm_agent/setting_test.json
+plm_agent/gcp_*.json
+**/gcp_*.json
+*.pem
+hermes-config/config.local.yaml
+# PLM deploy secrets: 只留 *.example, 真值(api.json/plm-settings.json/plm.env 等)绝不入库
+deploy/secrets/*
+!deploy/secrets/*.example
+# deploy 运行时目录(容器挂载的副本 / 日志 / 备份), 不入库
+deploy/hermes-home/
+deploy/hermes-agent-src/
+deploy/*.log
+deploy/*.bak-*
+deploy/docker-compose.yml.bak*

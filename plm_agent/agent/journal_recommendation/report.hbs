@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>期刊推荐报告</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm;
+    }
+  </style>
+</head>
+
+<body class="text-[#242424] bg-white">
+  <div class="max-w-4xl mx-auto px-4 py-6">
+
+    <!-- 标题 -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-semibold">期刊推荐报告</h1>
+      <div class="text-sm text-[#BBBBBB]">期刊推荐报告内容由AI生成，仅供参考</div>
+    </div>
+
+    <!-- 开场白 -->
+    <div class="font-medium mb-1">尊敬的作者</div>
+    <div class="space-y-4 mb-6">
+      <div class="text-base indent-8">
+        本期刊推荐报告将帮助你为论文最终确定目标期刊。
+        AI领域专家已审阅你的稿件，并根据与你论文当前内容最匹配的范围、检索收录要求以及影响因子区间，
+        整理出期刊推荐列表。
+        在综合考虑你的偏好后，专家在推荐期刊时兼顾了接受概率、研究方向匹配度以及你的个人偏好，
+        从而为你筛选出最适合的期刊。
+      </div>
+
+      <!-- Abstract -->
+      <div class="bg-[#295BE40F] rounded-r-xl border-l-4 border-[#295BE4] py-3 px-4 text-sm">
+        {{abstract}}
+      </div>
+
+      <div class="indent-8">{{abstract_summary}}</div>
+      <div class="indent-8">关键词：{{keywords}}</div>
+    </div>
+
+    <!-- 期刊卡片 -->
+    {{#each top_journals}}
+      <div class="p-5 rounded-[16px] border border-[#F1F1F1] bg-[#FDFDFD] mb-6 break-inside-avoid">
+
+        <!-- 标题 -->
+        <div class="mb-2">
+          <h3 class="text-base font-semibold">{{journal_title}}</h3>
+          <div class="text-sm text-gray-500">
+            {{publisher}}{{#if publisher_region}} · {{publisher_region}}{{/if}}
+          </div>
+        </div>
+
+        <!-- 徽章 -->
+        <div class="flex flex-wrap gap-1.5 mb-3 text-sm">
+          {{#if impact_factor}}<span class="px-2 py-0.5 rounded bg-blue-100">影响因子: {{impact_factor}}</span>{{/if}}
+          {{#if jcr}}<span class="px-2 py-0.5 rounded bg-purple-100">JCR分区: {{jcr}}</span>{{/if}}
+          {{#if cas_major}}<span class="px-2 py-0.5 rounded bg-orange-100">中科院大类: {{cas_major}}</span>{{/if}}
+          {{#if cas_minor}}<span class="px-2 py-0.5 rounded bg-teal-100">中科院小类: {{cas_minor}}</span>{{/if}}
+        </div>
+
+        <!-- 推荐理由 -->
+        <div class="border-t border-[#EEEEEE] pt-4 space-y-2">
+          <div class="font-medium">推荐理由</div>
+
+          <!-- 星级 -->
+          <div class="flex gap-6 text-sm">
+            <div>学术影响力：{{academic_stars}}</div>
+            <div>内容相关度：{{relevance_stars}}</div>
+            <div>投稿可行性：{{publishability_stars}}</div>
+          </div>
+
+          <div class="text-sm leading-relaxed">{{recommendation_reason}}</div>
+
+          <!-- 相似文献 -->
+          {{#if similar_articles.length}}
+            <div>
+              <div class="font-medium mt-2">相似文献：</div>
+              <ul class="list-disc pl-5 text-sm space-y-1">
+                {{#each similar_articles}}
+                  <li>{{title}}</li>
+                {{/each}}
+              </ul>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{/each}}
+
+  </div>
+</body>
+</html>
