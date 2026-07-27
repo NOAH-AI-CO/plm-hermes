@@ -1,0 +1,57 @@
+name: Deploy Server PLM Engine yiyong-prod
+
+on:
+  push:
+    branches: [yiyong-prod]
+    paths:
+      - 'plm_agent/**'
+      - 'deploy/Dockerfile.plm-engine'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-server-engine:
+    runs-on: [self-hosted, linux, x64, yiyong-server-prod]
+    environment:
+      name: yiyong-server-production
+    concurrency:
+      group: yiyong-server-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Resolve active Agent base image
+        id: agent-image
+        run: |
+          set -euo pipefail
+          agent_container=$(docker ps -q \
+            --filter 'label=com.docker.compose.project=noah-agent-site' \
+            --filter 'label=com.docker.compose.service=noah-agent')
+          test -n "$agent_container"
+          agent_image=$(docker inspect --format '{{.Config.Image}}' "$agent_container")
+          case "$agent_image" in
+            yiyong-source/noah-agent:*) ;;
+            *)
+              printf 'Unexpected active Agent image: %s\n' "$agent_image" >&2
+              exit 1
+              ;;
+          esac
+          docker image inspect "$agent_image" >/dev/null
+          printf 'image=%s\n' "$agent_image" >> "$GITHUB_OUTPUT"
+      - name: Build Server PLM Engine image
+        run: |
+          set -euo pipefail
+          docker buildx build --load \
+            --build-arg "NOAH_AGENT_IMAGE=${{ steps.agent-image.outputs.image }}" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --label 'io.yiyong.deployment-target=server' \
+            --tag "yiyong-source/plm-engine:$GITHUB_SHA" \
+            --file deploy/Dockerfile.plm-engine .
+      - name: Deploy Server PLM Engine service
+        run: |
+          set -euo pipefail
+          sudo /usr/local/sbin/yiyong-platform-target server source-deploy-component \
+            "$GITHUB_WORKSPACE" plm-hermes "$GITHUB_SHA" "plm-engine-${GITHUB_SHA::12}"

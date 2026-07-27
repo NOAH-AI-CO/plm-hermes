@@ -3,8 +3,8 @@ name: Deploy Client Hermes WebUI yiyong-prod
 on:
   push:
     branches: [yiyong-prod]
-    paths-ignore:
-      - '.github/**'
+    paths:
+      - 'webui/**'
   workflow_dispatch:
 
 permissions:
