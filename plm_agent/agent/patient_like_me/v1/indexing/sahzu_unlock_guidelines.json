@@ -1,0 +1,25 @@
+{
+  "_comment": "sahzu 上传解锁清单 — 唯一 source of truth。Backend 与 NoahAgent 索引脚本共用此文件。新增/移除受管指南时只改这一份。filename 必须与 PDF 完全一致, guideline_id 索引脚本执行后回填(int(md5(filename)[:15],16))。上传解锁走文件名核对: 精确 or 归一化匹配 (空白/全角标点), 命中即写入 OrganizationGuidelineAccess。",
+  "guidelines": [
+    {"filename": "（2018.V1）CSCO、中华医学会、CACA专家共识：西达本胺治疗外周T细胞淋巴瘤.pdf", "publisher": "CSCO", "guideline_id": "433156008174287860"},
+    {"filename": "（2020.V1）中华医学会、CSCO专家共识：淋巴瘤自体造血干细胞动员和采集.pdf", "publisher": "CSCO", "guideline_id": "918124363736050228"},
+    {"filename": "（2022.V1）CACA、中华医学会、CSCO指南：套细胞淋巴瘤诊断与治疗.pdf", "publisher": "CSCO", "guideline_id": "783648955411728985"},
+    {"filename": "（2022.V1）CSCO专家共识：布鲁顿酪氨酸激酶抑制剂治疗B细胞恶性肿瘤.pdf", "publisher": "CSCO", "guideline_id": "67151679124953958"},
+    {"filename": "（2023.V1）CSCO专家共识：盐酸米托蒽醌脂质体注射液治疗外周T细胞淋巴瘤.pdf", "publisher": "CSCO", "guideline_id": "474707289820243637"},
+    {"filename": "（2023.V1）CSCO指南：淋巴瘤自体造血干细胞移植指导原则.pdf", "publisher": "CSCO", "guideline_id": "464576084273764558"},
+    {"filename": "（2024.V1）中华医学会、CSCO专家共识：原发性中枢神经系统淋巴瘤诊断及治疗.pdf", "publisher": "CSCO", "guideline_id": "990159480080825088"},
+    {"filename": "（2025.V1）CACA、中华医学会、CSCO指南：边缘区淋巴瘤诊断与治疗.pdf", "publisher": "CSCO", "guideline_id": "213136572214915037"},
+    {"filename": "（2025.V1）CSCO、中华医学会专家共识：淋巴结外周T细胞淋巴瘤诊断与治疗.pdf", "publisher": "CSCO", "guideline_id": "839358434493316949"},
+    {"filename": "（2025.V1）CSCO专家共识：T细胞免疫疗法治疗侵袭性B细胞淋巴瘤.pdf", "publisher": "CSCO", "guideline_id": "401813328465821145"},
+    {"filename": "（2025.V1）CSCO指南：淋巴瘤诊疗.pdf", "publisher": "CSCO", "guideline_id": "634072509229965690"},
+    {"filename": "（2025.V1）中华医学会、CACA、CSCO专家共识：人类免疫缺陷病毒感染相关弥漫大B细胞淋巴瘤诊断与治疗.pdf", "publisher": "CSCO", "guideline_id": "595745992626882894"},
+    {"filename": "（2025.V1）中华医学会、CSCO专家共识：浆母细胞淋巴瘤诊断与治疗.pdf", "publisher": "CSCO", "guideline_id": "937444438193780277"},
+    {"filename": "（2018.V1）CACA、中华医学会专家共识：造血干细胞移植治疗淋巴瘤.pdf", "publisher": "OTHER", "guideline_id": "451124168742850344"},
+    {"filename": "（2022.V1）WHO第5版分类：造血和淋巴组织肿瘤-淋巴肿瘤.pdf", "publisher": "OTHER", "guideline_id": "1104967181726794491"},
+    {"filename": "（2023.V1）中国人体健康科技促进会、中国医师协会、中国医疗保健国际交流促进会、CACA专家共识：眼附属器黏膜相关淋巴组织结外边缘区淋巴瘤诊治.pdf", "publisher": "OTHER", "guideline_id": "683348370392326353"},
+    {"filename": "（2023.V1）中国医师协会、中国医学装备协会、中国研究型医院学会、CACA专家共识：淋巴瘤基因重排检测技术及解读.pdf", "publisher": "OTHER", "guideline_id": "599167363766611035"},
+    {"filename": "（2024.V1）国家癌症中心、国家肿瘤质控中心指南：蕈样霉菌病全身皮肤放射治疗.pdf", "publisher": "OTHER", "guideline_id": "120960826687698547"},
+    {"filename": "（2025.V1）ERN-EuroBloodNet临床实践指南：成人伯基特淋巴瘤的诊断和治疗.pdf", "publisher": "OTHER", "guideline_id": "430217709700232787"},
+    {"filename": "（2025.V1）中华医学会指南：淋巴瘤PET／CT及PET／MR显像临床应用.pdf", "publisher": "OTHER", "guideline_id": "789567693430364975"}
+  ]
+}

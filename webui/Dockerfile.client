@@ -1,0 +1,46 @@
+FROM python:3.13-alpine
+
+LABEL maintainer="nesquena"
+LABEL description="Hermes Web UI client-only browser interface"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=utf-8 \
+    HERMES_WEBUI_HOST=0.0.0.0 \
+    HERMES_WEBUI_PORT=8787 \
+    HERMES_WEBUI_CLIENT_ONLY=1 \
+    HERMES_WEBUI_DEFAULT_THEME=light
+
+# The client image has no Agent source, skills, terminal tooling, or dynamic
+# dependency installation. Bash is retained for the shared health probe.
+RUN apk add --no-cache bash ca-certificates \
+    && update-ca-certificates
+
+RUN addgroup -g 1000 hermeswebui \
+    && adduser -D -H -u 1000 -G hermeswebui -s /sbin/nologin hermeswebui \
+    && mkdir -p /app /home/hermeswebui/.hermes/webui /workspace \
+    && chown -R hermeswebui:hermeswebui /app /home/hermeswebui /workspace
+
+WORKDIR /app
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=hermeswebui:hermeswebui . /app
+
+ARG HERMES_VERSION=unknown
+RUN printf "__version__ = '%s'\n" "$HERMES_VERSION" > /app/api/_version.py \
+    && touch /.within_container
+
+USER hermeswebui
+
+EXPOSE 8787
+
+HEALTHCHECK --interval=30s --timeout=8s --start-period=10s --retries=3 \
+    CMD bash /app/scripts/lib/health_probe.sh 127.0.0.1 8787 /health 2 >/dev/null || exit 1
+
+CMD ["python", "server.py"]

@@ -1,0 +1,65 @@
+# 高证据类：最高优先展示
+"Practice Guideline": 3.0
+"Guideline": 3.0
+"Consensus Development Conference": 2.8
+"Consensus Development Conference, NIH": 2.8
+
+"Systematic Review": 2.5
+"Meta-Analysis": 2.5
+"Network Meta-Analysis": 2.5
+"Scoping Review": 2.0   # 一般综述，低于系统综述/Meta
+
+# RCT / 临床试验
+"Randomized Controlled Trial": 2.2
+"Controlled Clinical Trial": 2.0
+"Pragmatic Clinical Trial": 2.0
+"Equivalence Trial": 2.0
+
+"Clinical Trial": 1.8
+"Clinical Trial, Phase I": 1.5
+"Clinical Trial, Phase II": 1.8
+"Clinical Trial, Phase III": 2.0
+"Clinical Trial, Phase IV": 2.0
+"Adaptive Clinical Trial": 1.8
+"Clinical Trial Protocol": 1.0   # 协议类，信息性为主
+
+# 观察性/多中心/验证
+"Observational Study": 1.5
+"Multicenter Study": 1.5
+"Validation Study": 1.5
+"Comparative Study": 1.3
+"Clinical Study": 1.3
+
+# 次级证据或个案类
+"Case Reports": 0.8
+"Dataset": 1.0
+"Technical Report": 1.0
+
+# 一般信息性/低证据
+"Journal Article": 1.0
+"Review": 1.2
+"English Abstract": 0.7
+"Introductory Journal Article": 0.7
+"Interview": 0.6
+"Overall": 0.6
+"Editorial": 0.7
+"Letter": 0.7
+"News": 0.6
+"Preprint": 0.7
+"Other": 0.6
+
+# 强降权 / 排除
+"Retracted Publication": 0.0
+"Retraction Notice": 0.0
+"Expression of Concern": 0.0
+"Duplicate Publication": 0.3
+"Published Erratum": 0.5
+"Corrected and Republished Article": 0.5
+
+# 兽医研究（除非专门需要，否则降权）
+"Randomized Controlled Trial, Veterinary": 0.5
+"Clinical Trial, Veterinary": 0.5
+"Observational Study, Veterinary": 0.5
+
+# 资助类标签（仅元数据用，不影响证据强度）
+"Funding": 1.0

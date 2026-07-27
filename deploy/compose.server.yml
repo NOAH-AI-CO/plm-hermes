@@ -1,0 +1,29 @@
+services:
+  hermes-agent:
+    image: ${HERMES_AGENT_IMAGE:?Set HERMES_AGENT_IMAGE to an immutable Agent digest}
+    command:
+      - sh
+      - -ec
+      - |
+        export API_SERVER_KEY="$$(cat /run/secrets/gateway_key)"
+        export HERMES_API_SERVER_KEY="$$API_SERVER_KEY"
+        exec /opt/hermes/.venv/bin/hermes gateway run
+    volumes:
+      - ./server-hermes-home:/home/hermes/.hermes
+    secrets: [gateway_key]
+    environment:
+      HERMES_HOME: /home/hermes/.hermes
+      API_SERVER_KEY: ""
+      HERMES_API_SERVER_KEY: ""
+      API_SERVER_HOST: 0.0.0.0
+      API_SERVER_PORT: "8642"
+    restart: unless-stopped
+    networks: [server_private]
+
+networks:
+  server_private:
+    internal: true
+
+secrets:
+  gateway_key:
+    file: ./secrets/gateway_key

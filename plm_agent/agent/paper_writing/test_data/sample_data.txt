@@ -1,0 +1,48 @@
+CSV File: sample_data.csv
+==================================================
+
+Columns:
+Patient_ID, Age, Gender, Blood_Pressure_Systolic, Blood_Pressure_Diastolic, Heart_Rate, Cholesterol_Total, Cholesterol_HDL, Cholesterol_LDL, Triglycerides, Diabetes_Status, Treatment_Group, Outcome_Score
+
+Data Summary:
+Total rows: 20
+Total columns: 13
+
+First 10 rows of data:
+------------------------------
+Row 1: {'Patient_ID': 'P001', 'Age': 45, 'Gender': 'Male', 'Blood_Pressure_Systolic': 140, 'Blood_Pressure_Diastolic': 90, 'Heart_Rate': 75, 'Cholesterol_Total': 220, 'Cholesterol_HDL': 45, 'Cholesterol_LDL': 150, 'Triglycerides': 180, 'Diabetes_Status': 'No', 'Treatment_Group': 'Control', 'Outcome_Score': 65}
+Row 2: {'Patient_ID': 'P002', 'Age': 52, 'Gender': 'Female', 'Blood_Pressure_Systolic': 135, 'Blood_Pressure_Diastolic': 85, 'Heart_Rate': 72, 'Cholesterol_Total': 210, 'Cholesterol_HDL': 50, 'Cholesterol_LDL': 140, 'Triglycerides': 160, 'Diabetes_Status': 'No', 'Treatment_Group': 'Treatment', 'Outcome_Score': 78}
+Row 3: {'Patient_ID': 'P003', 'Age': 38, 'Gender': 'Male', 'Blood_Pressure_Systolic': 150, 'Blood_Pressure_Diastolic': 95, 'Heart_Rate': 80, 'Cholesterol_Total': 240, 'Cholesterol_HDL': 40, 'Cholesterol_LDL': 170, 'Triglycerides': 200, 'Diabetes_Status': 'Yes', 'Treatment_Group': 'Control', 'Outcome_Score': 45}
+Row 4: {'Patient_ID': 'P004', 'Age': 61, 'Gender': 'Female', 'Blood_Pressure_Systolic': 130, 'Blood_Pressure_Diastolic': 80, 'Heart_Rate': 68, 'Cholesterol_Total': 200, 'Cholesterol_HDL': 55, 'Cholesterol_LDL': 130, 'Triglycerides': 140, 'Diabetes_Status': 'No', 'Treatment_Group': 'Treatment', 'Outcome_Score': 82}
+Row 5: {'Patient_ID': 'P005', 'Age': 49, 'Gender': 'Male', 'Blood_Pressure_Systolic': 145, 'Blood_Pressure_Diastolic': 88, 'Heart_Rate': 77, 'Cholesterol_Total': 230, 'Cholesterol_HDL': 42, 'Cholesterol_LDL': 160, 'Triglycerides': 190, 'Diabetes_Status': 'Yes', 'Treatment_Group': 'Control', 'Outcome_Score': 58}
+Row 6: {'Patient_ID': 'P006', 'Age': 55, 'Gender': 'Female', 'Blood_Pressure_Systolic': 125, 'Blood_Pressure_Diastolic': 78, 'Heart_Rate': 70, 'Cholesterol_Total': 195, 'Cholesterol_HDL': 58, 'Cholesterol_LDL': 125, 'Triglycerides': 135, 'Diabetes_Status': 'No', 'Treatment_Group': 'Treatment', 'Outcome_Score': 85}
+Row 7: {'Patient_ID': 'P007', 'Age': 42, 'Gender': 'Male', 'Blood_Pressure_Systolic': 155, 'Blood_Pressure_Diastolic': 100, 'Heart_Rate': 85, 'Cholesterol_Total': 250, 'Cholesterol_HDL': 38, 'Cholesterol_LDL': 180, 'Triglycerides': 220, 'Diabetes_Status': 'Yes', 'Treatment_Group': 'Control', 'Outcome_Score': 42}
+Row 8: {'Patient_ID': 'P008', 'Age': 58, 'Gender': 'Female', 'Blood_Pressure_Systolic': 120, 'Blood_Pressure_Diastolic': 75, 'Heart_Rate': 65, 'Cholesterol_Total': 190, 'Cholesterol_HDL': 60, 'Cholesterol_LDL': 120, 'Triglycerides': 130, 'Diabetes_Status': 'No', 'Treatment_Group': 'Treatment', 'Outcome_Score': 88}
+Row 9: {'Patient_ID': 'P009', 'Age': 47, 'Gender': 'Male', 'Blood_Pressure_Systolic': 140, 'Blood_Pressure_Diastolic': 92, 'Heart_Rate': 76, 'Cholesterol_Total': 225, 'Cholesterol_HDL': 44, 'Cholesterol_LDL': 155, 'Triglycerides': 175, 'Diabetes_Status': 'No', 'Treatment_Group': 'Control', 'Outcome_Score': 70}
+Row 10: {'Patient_ID': 'P010', 'Age': 63, 'Gender': 'Female', 'Blood_Pressure_Systolic': 115, 'Blood_Pressure_Diastolic': 72, 'Heart_Rate': 62, 'Cholesterol_Total': 185, 'Cholesterol_HDL': 62, 'Cholesterol_LDL': 115, 'Triglycerides': 125, 'Diabetes_Status': 'No', 'Treatment_Group': 'Treatment', 'Outcome_Score': 90}
+
+Data Types:
+------------------------------
+Patient_ID: object
+Age: int64
+Gender: object
+Blood_Pressure_Systolic: int64
+Blood_Pressure_Diastolic: int64
+Heart_Rate: int64
+Cholesterol_Total: int64
+Cholesterol_HDL: int64
+Cholesterol_LDL: int64
+Triglycerides: int64
+Diabetes_Status: object
+Treatment_Group: object
+Outcome_Score: int64
+
+File Classification Information:
+------------------------------
+This is a CSV data file containing structured data.
+Category: DATA_FILE
+Format: CSV (Comma-Separated Values)
+Content: Tabular data with multiple columns and rows
+Contains 20 rows with actual data
+Numeric columns: Age, Blood_Pressure_Systolic, Blood_Pressure_Diastolic, Heart_Rate, Cholesterol_Total, Cholesterol_HDL, Cholesterol_LDL, Triglycerides, Outcome_Score
+Text columns: Patient_ID, Gender, Diabetes_Status, Treatment_Group

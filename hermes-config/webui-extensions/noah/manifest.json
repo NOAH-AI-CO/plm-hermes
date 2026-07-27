@@ -1,0 +1,34 @@
+{
+    "name": "Noah Medical Brand",
+    "version": "4.4.5",
+    "description": "Noah Medical AI 品牌 + APA 卡片 + 预览增强 + workspace 一键下载 + 移动端适配 + md 链接侧边预览",
+    "author": "Noah Medical Team",
+    "stylesheets": [
+        "noah-brand.css",
+        "noah-citations.css",
+        "noah-mobile.css",
+        "noah-plm-panels.css",
+        "noah-plm-guidelines.css",
+        "noah-plm-admin.css",
+        "noah-plm-composer.css",
+        "noah-plm-clean.css"
+    ],
+    "scripts": [
+        "noah-plm-apibase.js",
+        "noah-brand.js",
+        "noah-citations.js",
+        "noah-preview-enhancer.js",
+        "noah-download.js",
+        "noah-mobile.js",
+        "noah-md-links.js",
+        "noah-plm-panels.js",
+        "noah-plm-guidelines-v2.js",
+        "noah-plm-home.js",
+        "noah-plm-admin.js",
+        "noah-plm-composer.js",
+        "noah-plm-humanize.js",
+        "noah-plm-sidebar.js",
+        "noah-plm-history-bridge.js",
+        "noah-plm-noupload.js"
+    ]
+}

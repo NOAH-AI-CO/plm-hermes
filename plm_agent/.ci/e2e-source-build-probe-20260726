@@ -1,0 +1,2 @@
+This marker is excluded from Docker build contexts.
+It exists only to verify the reviewed source deployment path.

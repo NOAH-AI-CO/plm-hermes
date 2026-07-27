@@ -1,0 +1,394 @@
+app:
+  description: PLM 循证医学（智能分流 + 卡片确认 + 主接口；含药物说明书段）
+  icon: 🧑‍⚕️
+  icon_background: '#E4FBCC'
+  mode: workflow
+  name: PLM-with-router
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data: { isInIteration: false, isInLoop: false, sourceType: start, targetType: code }
+      id: e1
+      source: '1790458321384'
+      sourceHandle: source
+      target: '1790461961477'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: code, targetType: if-else }
+      id: e2
+      source: '1790461961477'
+      sourceHandle: source
+      target: '1790500000001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: if-else, targetType: human-input }
+      id: e3
+      source: '1790500000001'
+      sourceHandle: 'true'
+      target: '1790458324939'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: if-else, targetType: code }
+      id: e4
+      source: '1790500000001'
+      sourceHandle: 'false'
+      target: '1790500000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: human-input, targetType: code }
+      id: e5
+      source: '1790458324939'
+      sourceHandle: action_1
+      target: '1790462260069'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: code, targetType: end }
+      id: e6
+      source: '1790462260069'
+      sourceHandle: source
+      target: '1790462466636'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data: { isInIteration: false, isInLoop: false, sourceType: code, targetType: end }
+      id: e7
+      source: '1790500000002'
+      sourceHandle: source
+      target: '1790462466636'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: query
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: query
+      height: 109
+      id: '1790458321384'
+      position: { x: 0, y: 280 }
+      positionAbsolute: { x: 0, y: 280 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(patient_input: str) -> dict:\n    import httpx, time, json\n\
+          \n    API_BASE = \"https://demo.noahai.co/api\"\n    TOKEN = \"3771967bfca7de823440b93c29c0fa04f0c8e1a2\"\
+          \n    headers = {\"Authorization\": f\"Token {TOKEN}\", \"Content-Type\"\
+          : \"application/json\"}\n\n    fail = {\"facts_markdown\": \"\", \"patient_info_json\"\
+          : \"\", \"patient_input_structured\": \"\", \"has_clear_diagnosis\": False,\
+          \ \"facts_count\": 0, \"need_card\": False}\n\n    try:\n        resp =\
+          \ httpx.post(f\"{API_BASE}/plm_evidence_based/extract-and-check/\",\n   \
+          \                      json={\"patient_input\": patient_input},\n       \
+          \                  headers=headers, timeout=30)\n        task_id = resp.json().get(\"\
+          data\", {}).get(\"task_id\")\n    except Exception:\n        return fail\n\
+          \    if not task_id:\n        return fail\n\n    for _ in range(60):\n \
+          \       time.sleep(5)\n        try:\n            poll = httpx.get(f\"{API_BASE}/execute_task/{task_id}/\"\
+          , headers=headers, timeout=30)\n            inner = poll.json().get(\"data\"\
+          , {})\n        except Exception:\n            continue\n        if inner.get(\"\
+          task_status\") == \"complete\":\n            rj = inner.get(\"result_json\"\
+          , {})\n            if isinstance(rj, str): rj = json.loads(rj)\n       \
+          \     d = rj.get(\"data\", {})\n            if isinstance(d, str): d = json.loads(d)\n\
+          \            patient_info = d.get(\"patient_info\") or {}\n            facts\
+          \ = d.get(\"facts\") or []\n            has_clear = bool(patient_info.get(\"\
+          has_clear_diagnosis\", False))\n            filled_count = sum(1 for f in\
+          \ facts if f.get(\"source\") in (\"system_extracted\", \"user_input\") and\
+          \ f.get(\"value\"))\n            need_card = has_clear and filled_count\
+          \ >= 3\n\n            if facts:\n                src_map = {\"user_input\"\
+          : \"人工输入\", \"system_extracted\": \"图谱提取\", \"missing\": \"未填写\"}\n     \
+          \           lines = [\"| 字段 | 当前值 | 来源 | 必填 |\", \"|---|---|---|---|\"\
+          ]\n                for f in facts:\n                    label = f.get(\"\
+          label\", \"\") or f.get(\"key\", \"\")\n                    value = f.get(\"\
+          value\", \"\") or \"*（缺失）*\"\n                    src = src_map.get(f.get(\"\
+          source\"), \"\")\n                    req = \"✅\" if f.get(\"required_for_graph\"\
+          ) else \"\"\n                    lines.append(f\"| {label} | {value} | {src}\
+          \ | {req} |\")\n                facts_md = \"\\n\".join(lines)\n       \
+          \     else:\n                facts_md = \"\"\n\n            return {\n \
+          \               \"facts_markdown\": facts_md,\n                \"patient_info_json\"\
+          : json.dumps(patient_info, ensure_ascii=False),\n                \"patient_input_structured\"\
+          : d.get(\"patient_input_structured\") or \"\",\n                \"has_clear_diagnosis\"\
+          : has_clear,\n                \"facts_count\": filled_count,\n         \
+          \       \"need_card\": need_card,\n            }\n        if inner.get(\"\
+          task_status\") in (\"failed\", \"error\"):\n            return fail\n  \
+          \  return fail"
+        code_language: python3
+        desc: 阶段一：抽取病例 + 判断是否需要卡片
+        outputs:
+          facts_markdown: { children: null, type: string }
+          patient_info_json: { children: null, type: string }
+          patient_input_structured: { children: null, type: string }
+          has_clear_diagnosis: { children: null, type: boolean }
+          facts_count: { children: null, type: number }
+          need_card: { children: null, type: boolean }
+        selected: false
+        title: 阶段一：抽取 + 预判
+        type: code
+        variables:
+        - value_selector: ['1790458321384', query]
+          value_type: string
+          variable: patient_input
+      height: 80
+      id: '1790461961477'
+      position: { x: 280, y: 280 }
+      positionAbsolute: { x: 280, y: 280 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: cond_need_card
+            value: true
+            varType: boolean
+            variable_selector: ['1790461961477', need_card]
+          id: 'true'
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 是否要卡片确认
+        type: if-else
+      height: 124
+      id: '1790500000001'
+      position: { x: 560, y: 280 }
+      positionAbsolute: { x: 560, y: 280 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        delivery_methods:
+        - enabled: true
+          id: c19e304e-1372-4424-8f2b-61cc036d56a9
+          type: webapp
+        form_content: |-
+          ## 请核对自动抽取的病例信息
+
+          {{#1790461961477.facts_markdown#}}
+
+          如有需要，请在下方按 `字段: 值` 的格式补充或修改（每行一项；保持原样则留空）：
+
+          {{#$output.user_edits#}}
+        inputs:
+        - default: { selector: [], type: constant, value: '' }
+          output_variable_name: user_edits
+          type: paragraph
+        selected: false
+        timeout: 3
+        timeout_unit: day
+        title: 人工介入
+        type: human-input
+        user_actions:
+        - button_style: primary
+          id: action_1
+          title: 确认并继续
+      height: 190
+      id: '1790458324939'
+      position: { x: 840, y: 120 }
+      positionAbsolute: { x: 840, y: 120 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(patient_input: str, patient_info_json: str, patient_input_structured:\
+          \ str, user_edits: str) -> dict:\n    import httpx, time, json, re\n\n \
+          \   API_BASE = \"https://demo.noahai.co/api\"\n    TOKEN = \"3771967bfca7de823440b93c29c0fa04f0c8e1a2\"\
+          \n    headers = {\"Authorization\": f\"Token {TOKEN}\", \"Content-Type\"\
+          : \"application/json\"}\n\n    structured_fields = {}\n    if user_edits:\n\
+          \        for raw in re.split(r\"[\\n；;]\", user_edits):\n            line\
+          \ = raw.strip().strip(\"`\").strip()\n            m = re.match(r\"^([^:：=]+)\\\
+          s*[:：=]\\s*(.+)$\", line)\n            if m:\n                structured_fields[m.group(1).strip()]\
+          \ = m.group(2).strip()\n\n    body = {\"patient_input\": patient_input}\n\
+          \    if patient_info_json:\n        try: body[\"confirmed_patient_info\"\
+          ] = json.loads(patient_info_json)\n        except: pass\n    if patient_input_structured:\n\
+          \        body[\"patient_input_structured\"] = patient_input_structured\n\
+          \    if structured_fields:\n        body[\"structured_fields\"] = structured_fields\n\
+          \n    resp = httpx.post(f\"{API_BASE}/plm_evidence_based/\", json=body,\
+          \ headers=headers, timeout=30)\n    task_id = resp.json().get(\"data\",\
+          \ {}).get(\"task_id\")\n    if not task_id:\n        return {\"result\"\
+          : \"错误：未获取到 task_id\"}\n\n    for _ in range(120):\n        time.sleep(10)\n\
+          \        poll = httpx.get(f\"{API_BASE}/execute_task/{task_id}/\", headers=headers,\
+          \ timeout=30)\n        inner = poll.json().get(\"data\", {})\n        if\
+          \ inner.get(\"task_status\") == \"complete\":\n            rj = inner.get(\"\
+          result_json\", {})\n            if isinstance(rj, str): rj = json.loads(rj)\n\
+          \            d = rj.get(\"data\", {})\n            if isinstance(d, str):\
+          \ d = json.loads(d)\n            route = d.get(\"route\") or \"\"\n     \
+          \       output = d.get(\"output\") or \"\"\n            if route == \"insufficient_case\"\
+          :\n                mi = d.get(\"missing_information\") or []\n           \
+          \     if mi: output += \"\\n\\n建议补充：\" + \"、\".join(mi)\n            return\
+          \ {\"result\": output or \"无输出内容\"}\n        if inner.get(\"task_status\"\
+          ) in (\"failed\", \"error\"):\n            return {\"result\": \"错误：诊疗任务失败\"\
+          }\n    return {\"result\": \"错误：轮询超时\"}"
+        code_language: python3
+        desc: 阶段二：带卡片确认结果调主接口
+        outputs:
+          result: { children: null, type: string }
+        selected: false
+        title: 阶段二：带卡片
+        type: code
+        variables:
+        - value_selector: ['1790458321384', query]
+          value_type: string
+          variable: patient_input
+        - value_selector: ['1790461961477', patient_info_json]
+          value_type: string
+          variable: patient_info_json
+        - value_selector: ['1790461961477', patient_input_structured]
+          value_type: string
+          variable: patient_input_structured
+        - value_selector: ['1790458324939', user_edits]
+          value_type: string
+          variable: user_edits
+      height: 80
+      id: '1790462260069'
+      position: { x: 1120, y: 120 }
+      positionAbsolute: { x: 1120, y: 120 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(patient_input: str, patient_input_structured: str) -> dict:\n\
+          \    import httpx, time, json\n\n    API_BASE = \"https://demo.noahai.co/api\"\
+          \n    TOKEN = \"3771967bfca7de823440b93c29c0fa04f0c8e1a2\"\n    headers\
+          \ = {\"Authorization\": f\"Token {TOKEN}\", \"Content-Type\": \"application/json\"\
+          }\n\n    body = {\"patient_input\": patient_input}\n    if patient_input_structured:\n\
+          \        body[\"patient_input_structured\"] = patient_input_structured\n\
+          \n    resp = httpx.post(f\"{API_BASE}/plm_evidence_based/\", json=body,\
+          \ headers=headers, timeout=30)\n    task_id = resp.json().get(\"data\",\
+          \ {}).get(\"task_id\")\n    if not task_id:\n        return {\"result\"\
+          : \"错误：未获取到 task_id\"}\n\n    for _ in range(120):\n        time.sleep(10)\n\
+          \        poll = httpx.get(f\"{API_BASE}/execute_task/{task_id}/\", headers=headers,\
+          \ timeout=30)\n        inner = poll.json().get(\"data\", {})\n        if\
+          \ inner.get(\"task_status\") == \"complete\":\n            rj = inner.get(\"\
+          result_json\", {})\n            if isinstance(rj, str): rj = json.loads(rj)\n\
+          \            d = rj.get(\"data\", {})\n            if isinstance(d, str):\
+          \ d = json.loads(d)\n            route = d.get(\"route\") or \"\"\n     \
+          \       output = d.get(\"output\") or \"\"\n            if route == \"insufficient_case\"\
+          :\n                mi = d.get(\"missing_information\") or []\n           \
+          \     if mi: output += \"\\n\\n建议补充：\" + \"、\".join(mi)\n            return\
+          \ {\"result\": output or \"无输出内容\"}\n        if inner.get(\"task_status\"\
+          ) in (\"failed\", \"error\"):\n            return {\"result\": \"错误：诊疗任务失败\"\
+          }\n    return {\"result\": \"错误：轮询超时\"}"
+        code_language: python3
+        desc: 阶段二：直接走主接口（quick_qa / insufficient 类型）
+        outputs:
+          result: { children: null, type: string }
+        selected: false
+        title: 阶段二：直接走
+        type: code
+        variables:
+        - value_selector: ['1790458321384', query]
+          value_type: string
+          variable: patient_input
+        - value_selector: ['1790461961477', patient_input_structured]
+          value_type: string
+          variable: patient_input_structured
+      height: 80
+      id: '1790500000002'
+      position: { x: 840, y: 440 }
+      positionAbsolute: { x: 840, y: 440 }
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        outputs:
+        - value_selector: ['1790462260069', result]
+          value_type: string
+          variable: result
+        - value_selector: ['1790500000002', result]
+          value_type: string
+          variable: result_direct
+        selected: false
+        title: 输出
+        type: end
+      height: 110
+      id: '1790462466636'
+      position: { x: 1400, y: 280 }
+      positionAbsolute: { x: 1400, y: 280 }
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.7
+  rag_pipeline_variables: []

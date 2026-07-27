@@ -1,0 +1,21 @@
+制作PPT
+
+原理
+1. 设计一个好的 promot，让 LLM 一次生成完整的 python 代码用来制作 PPT
+2. 调用 LLM，LLM 会流式返回 python 的完整代码
+3. 及时处理 LLM 返回的 python 代码，将可用的代码发送给 ppt-sandbox，ppt-sandbox会返回pptx文件和此pptx的每一页的预览图
+4. 重复这个循环，直到pptx文件制作完成
+
+一些友好的调试命令
+grep '\[agent\.ppt\.core\].*\[ERROR\]' ~/NoahServer/log/agent_log/agent.log > ~/tanght/agent.log
+grep '\[agent\.ppt\.core\].*' ~/NoahServer/log/agent_log/agent.log > ~/tanght/agent.log
+grep '\[agent\.ppt\.core\].*生物力学因子与细胞运命控制.*' ~/NoahServer/log/agent_log/agent.log > ~/tanght/agent.log
+grep 'pptx ' ~/NoahServer/log/django_log/basic.log > ~/tanght/django.log
+grep 'pptx buffer: ' ~/NoahServer/log/django_log/basic.log > ~/tanght/django.log
+
+docker compose -f compose_443_product.yaml up -d noah-ppt2pdf noah-ppt-sandbox
+docker compose -f compose_443_test.yaml up -d --build --force-recreate noah-ppt-sandbox
+docker compose -f compose_443_staging.yaml up -d --build --force-recreate noah-ppt-sandbox
+
+curl http://localhost:10001/api/v1/get_pptxsdk_info
+git clone https://github.com/NOAH-AI-CO/noah_ppt_sandbox.git

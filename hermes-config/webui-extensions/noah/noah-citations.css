@@ -1,0 +1,177 @@
+/*
+ * Noah Medical - Citation card styles
+ *
+ * 定义：
+ * - .noah-cite  正文里的可点击引用（上标样式）
+ * - .noah-cite-card  悬浮卡片本身
+ * - 各种子元素
+ *
+ * 深色/浅色模式自适应（用 var(--accent) 等 Noah 主题变量）
+ */
+
+/* ===== 正文引用样式（inline span，不影响行高）===== */
+.noah-cite {
+    display: inline;             /* 关键：纯 inline，不 block 化 */
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 0 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: inherit;        /* 继承父行高，不自造高度 */
+    box-decoration-break: clone; /* 跨行断行时保持样式 */
+    -webkit-box-decoration-break: clone;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.noah-cite:hover,
+.noah-cite:focus {
+    background: var(--accent-bg-strong);
+    color: var(--accent-text);
+    outline: none;
+}
+
+/* ===== 悬浮卡片 ===== */
+.noah-cite-card {
+    position: absolute;
+    z-index: 10000;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.14),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 32px 18px 16px 18px;  /* 顶部留出关闭按钮空间 */
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+    animation: noah-cite-fadein 0.18s ease-out;
+    max-height: 60vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+@keyframes noah-cite-fadein {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 固定态：加青绿色左边框强调 */
+.noah-cite-card.pinned {
+    border-left: 3px solid var(--accent);
+    padding-left: 16px;
+}
+
+/* 关闭按钮（浮在右上角）*/
+.noah-cite-card-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: transparent;
+    border: 0;
+    color: var(--text2);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.1s;
+    z-index: 2;
+}
+.noah-cite-card-close:hover {
+    color: var(--text);
+    background: var(--hover-bg);
+}
+
+/* 引用键 label（副标题：小灰） */
+.noah-cite-card-key {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-text);
+    background: var(--accent-bg);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+}
+
+/* ⭐ APA 全文（卡片主体，顶部核心）*/
+.noah-cite-card-apa {
+    color: var(--text);
+    margin: 0 0 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    word-break: break-word;
+    font-weight: 500;
+}
+.noah-cite-card-apa em {
+    color: var(--accent-text);
+    font-style: italic;
+}
+.noah-cite-card-apa a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent);
+}
+
+/* URL 链接 */
+.noah-cite-card-url {
+    margin: 8px 0 4px;
+}
+.noah-cite-card-url a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 12.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border-bottom: 1px dashed var(--accent);
+    padding-bottom: 1px;
+    transition: all 0.1s;
+}
+.noah-cite-card-url a:hover {
+    border-bottom-style: solid;
+    color: var(--accent-hover);
+}
+
+/* 原文分隔 */
+.noah-cite-card-sep {
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* 原文摘录 */
+.noah-cite-card-quote {
+    margin: 6px 0 0;
+    padding: 8px 10px 8px 12px;
+    background: var(--accent-bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    color: var(--text);
+    font-size: 12.5px;
+    line-height: 1.55;
+    font-style: italic;
+    white-space: pre-wrap;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+    .noah-cite-card {
+        width: calc(100vw - 24px) !important;
+        max-width: 400px;
+        left: 12px !important;
+    }
+}

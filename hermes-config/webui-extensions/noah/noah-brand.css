@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+/*
+ * Noah Medical Brand CSS - v4  (ui-ux-pro-max 医疗设计系统 applied)
+ * 主色 #00B0A0 + 健康绿 #059669 + Figtree/Noto Sans + WCAG focus
+ */
+
+/* 强制全局套用品牌:不依赖 data-skin 是否激活, 直接覆盖 --accent 一族,
+ * 修复"换了 skin / localStorage 残留导致 #00B0A0 不生效"的问题。 */
+:root, :root[data-skin] {
+    --accent: #00B0A0 !important;
+    --accent-hover: #009588 !important;
+    --accent-bg: rgba(0, 176, 160, 0.08) !important;
+    --accent-bg-strong: rgba(0, 176, 160, 0.18) !important;
+    --accent-text: #007268 !important;
+    --accent-rgb: 0, 176, 160 !important;
+    --link: #00B0A0 !important;
+    --color-primary: #00B0A0;
+    --color-accent: #059669;   /* 设计系统: 健康绿, 用于成功/确认 */
+}
+:root.dark, :root.dark[data-skin] {
+    --accent: #59CBC1 !important;
+    --accent-hover: #A5E3DD !important;
+    --accent-bg: rgba(89, 203, 193, 0.10) !important;
+    --accent-bg-strong: rgba(89, 203, 193, 0.20) !important;
+    --accent-text: #A5E3DD !important;
+    --accent-rgb: 89, 203, 193 !important;
+    --link: #59CBC1 !important;
+}
+body {
+    font-family: 'Figtree', 'Noto Sans SC', -apple-system, BlinkMacSystemFont,
+        'Segoe UI', system-ui, sans-serif;
+}
+/* 设计系统: 清晰 focus 环 (键盘可达性 WCAG) */
+a:focus-visible, button:focus-visible, [role="button"]:focus-visible,
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 3px solid rgba(0, 176, 160, 0.55);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+ * 1. Light mode 更白背景 + Noah 主色调（用 Extension skin 的方式）
+ *    参考：core 变量在 :root 定义，覆盖同 selector 优先级即可
+ * ============================================================ */
+:root[data-skin="noah"] {
+    /* 背景 - 更纯白 */
+    --bg: #FEFEFE;
+    --surface: #FFFFFF;
+    --surface2: #F7FBFA;
+    --surface-subtle: #F0F7F6;
+
+    /* 文字 - 深色 */
+    --text: #0F1A18;
+    --text2: #4A5C58;
+    --muted: #7B8B87;
+
+    /* 边框 */
+    --border: #E4EEEC;
+    --border2: #D4E4E1;
+    --hover-bg: rgba(0, 176, 160, 0.05);
+
+    /* Sidebar */
+    --sidebar: #F7FBFA;
+    --sidebar-text: #0F1A18;
+
+    /* Bubble */
+    --user-bubble: rgba(0, 176, 160, 0.10);
+    --assistant-bubble: #FFFFFF;
+
+    /* Code */
+    --code-bg: #F0F7F6;
+    --code-text: #007268;
+
+    /* Accent - Noah logo 色系 */
+    --accent: #00B0A0;
+    --accent-hover: #009588;
+    --accent-bg: rgba(0, 176, 160, 0.08);
+    --accent-bg-strong: rgba(0, 176, 160, 0.18);
+    --accent-text: #007268;
+    --accent-rgb: 0, 176, 160;
+    --link: #00B0A0;
+}
+
+/* Dark 模式 */
+:root.dark[data-skin="noah"] {
+    --bg: #0D1614;
+    --surface: #13211E;
+    --surface2: #182A26;
+    --surface-subtle: #1E332F;
+
+    --text: #E8F0EE;
+    --text2: #B0C4C0;
+    --muted: #7B8B87;
+
+    --border: #263C37;
+    --border2: #2E4842;
+    --hover-bg: rgba(0, 176, 160, 0.10);
+
+    --sidebar: #0F1B18;
+    --sidebar-text: #E8F0EE;
+
+    --user-bubble: rgba(0, 176, 160, 0.15);
+    --assistant-bubble: #182A26;
+
+    --code-bg: #0F1B18;
+    --code-text: #59CBC1;
+
+    --accent: #59CBC1;
+    --accent-hover: #A5E3DD;
+    --accent-bg: rgba(89, 203, 193, 0.10);
+    --accent-bg-strong: rgba(89, 203, 193, 0.20);
+    --accent-text: #A5E3DD;
+    --accent-rgb: 89, 203, 193;
+    --link: #59CBC1;
+}
+
+/* ============================================================
+ * 2. 隐藏顶栏
+ * ============================================================ */
+.app-titlebar {
+    display: none;
+}
+
+/* ============================================================
+ * 3. 隐藏左侧竖排 nav rail
+ * ============================================================ */
+nav.rail,
+.rail {
+    display: none;
+}
+.sidebar > .sidebar-nav {
+    display: none;
+}
+
+/* ============================================================
+ * 4. 隐藏 composer 底部多余控件
+ * ============================================================ */
+#btnSavedPrompts,
+#btnMic,
+#btnVoiceMode,
+#btnWorkspacePanelToggle,
+#btnWorkspacePrefs,
+#btnUploadWorkspace,
+.composer-model-wrap,
+.composer-reasoning-wrap,
+.composer-workspace-chip,
+.composer-workspace-wrap,
+.composer-profile-wrap,
+.composer-profile-chip,
+#profileChipWrap,
+#profileChip,
+#composerWorkspaceChip,
+.composer-yolo-pill,
+.composer-divider {
+    display: none;
+}
+
+/* ⚠️ 保留 workspace 右边缘展开按钮（面板收起后打开的唯一入口）*/
+/* #btnWorkspacePanelEdgeToggle 官方默认在面板收起时才显示 —— 不隐藏 */
+
+/* Composer mobile config 中的对应项 */
+.composer-mobile-config-btn[data-target="model"],
+.composer-mobile-config-btn[data-target="profile"],
+.composer-mobile-config-btn[data-target="workspace"],
+.composer-mobile-config-btn[data-target="reasoning"],
+#composerMobileWorkspaceAction,
+#composerMobileProfileAction {
+    display: none;
+}
+
+/* ============================================================
+ * 5. 隐藏 sidebar 顶部 webui/cli tab
+ * ============================================================ */
+.session-source-tabs {
+    display: none;
+}
+
+/* ============================================================
+ * 6. 隐藏 empty state 中间的蛇杖 SVG，用 Noah logo 替代
+ * ============================================================ */
+.empty-logo svg {
+    display: none;
+}
+.empty-logo {
+    width: 80px;
+    height: 80px;
+    background-image: url("/extensions/logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0 auto 16px;
+}
+
+/* ============================================================
+ * 7. Message body markdown 微调
+ * ============================================================ */
+.msg-body table {
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+.msg-body table thead {
+    background: var(--accent-bg);
+}
+.msg-body table thead th {
+    color: var(--accent-text);
+    font-weight: 600;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+.msg-body table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+.msg-body table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.msg-body blockquote {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: 8px 14px;
+    margin: 10px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.msg-body :not(pre) > code {
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* ============================================================
+ * 8. 主题切换按钮（Noah 自加，浮在右下 workspace 关闭时的边缘 toggle 上方）
+ * ============================================================ */
+#noah-theme-toggle {
+    position: fixed;
+    right: 12px;
+    bottom: 72px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: opacity 0.2s;
+    opacity: 0.4;
+}
+
+#noah-theme-toggle:hover {
+    opacity: 1;
+}
+
+#noah-theme-toggle button {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+#noah-theme-toggle button:hover {
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
+#noah-theme-toggle button.active {
+    background: var(--accent-bg-strong);
+    color: var(--accent-text);
+}
+
+#noah-theme-toggle button svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 隐藏开发用「Agent updates available」更新横幅(占顶部高度, 会把 composer 挤出屏幕) */
+#updateBanner, .update-banner { display: none !important; }
+
+/* PLM: 隐藏 webui 给 markdown 表格自动加的"筛选表格"输入框(临床小表不需要, 显得多余) */
+.markdown-table-filter { display: none !important; }

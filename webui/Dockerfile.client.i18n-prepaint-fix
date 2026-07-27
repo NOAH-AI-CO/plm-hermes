@@ -1,0 +1,5 @@
+ARG BASE_IMAGE=noah/plm-hermes-webui-client:history-context-20260723-r6
+FROM ${BASE_IMAGE}
+
+COPY --chown=hermeswebui:hermeswebui static/index.html /app/static/index.html
+COPY --chown=hermeswebui:hermeswebui static/i18n.js /app/static/i18n.js

@@ -1,0 +1,38 @@
+/* Noah PLM Composer 控件条 —— 常驻输入框上方, 两行 */
+.noah-composer-bar {
+    display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;
+    gap: 6px 14px; padding: 5px 10px; margin: 0 0 4px;
+    border-bottom: 1px dashed #E4EEEC; flex-shrink: 0;
+}
+.noah-composer-bar .ncb-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* 模式组 与 指南范围组 之间的分隔线, 让两个功能区更分明 */
+.noah-composer-bar .ncb-orgs { padding-left: 14px; border-left: 2px solid #DCEDEA; }
+@media (max-width: 720px) { .noah-composer-bar .ncb-orgs { padding-left: 0; border-left: none; } }
+.noah-composer-bar .ncb-seg {
+    display: inline-flex; background: #F0F7F6; border-radius: 999px; padding: 3px;
+}
+.noah-composer-bar .ncb-seg button {
+    appearance: none; border: none; background: transparent; cursor: pointer;
+    padding: 6px 16px; font-size: 13px; font-weight: 600; color: #4A5C58;
+    border-radius: 999px; transition: background .16s, color .16s;
+}
+.noah-composer-bar .ncb-seg button.active {
+    background: #00B0A0; color: #fff; box-shadow: 0 1px 4px rgba(0,176,160,.3);
+}
+.noah-composer-bar .ncb-label { font-size: 12px; color: #7B8B87; margin-right: 2px; }
+.noah-composer-bar .ncb-orgs button {
+    appearance: none; cursor: pointer; padding: 4px 12px; font-size: 12.5px; font-weight: 600;
+    color: #007268; background: #fff; border: 1.5px solid rgba(0,176,160,.4);
+    border-radius: 999px; transition: all .16s;
+}
+.noah-composer-bar .ncb-orgs button.active {
+    background: #00B0A0; color: #fff; border-color: #00B0A0;
+}
+.noah-composer-bar .ncb-orgs button:hover { border-color: #00B0A0; }
+
+/* 控件条入场 */
+.noah-composer-bar { animation: ncbIn .3s cubic-bezier(.16,1,.3,1); }
+@keyframes ncbIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.noah-composer-bar .ncb-seg button, .noah-composer-bar .ncb-orgs button { transition: all .16s ease; }
+.noah-composer-bar .ncb-seg button:active, .noah-composer-bar .ncb-orgs button:active { transform: scale(.95); }
+@media (prefers-reduced-motion: reduce) { .noah-composer-bar { animation: none; } }

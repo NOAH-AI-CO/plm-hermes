@@ -1,0 +1,152 @@
+/*
+ * Noah PLM 报告分栏面板 - 应用 ui-ux-pro-max 医疗设计系统
+ * 诊断 / 检查 / 治疗 / 综合报告 / 次要指南补充
+ * 主色 #00B0A0, 白底, WCAG focus, 150-300ms 过渡, 无霓虹/渐变
+ */
+.noah-plm-report {
+    border: 1px solid var(--border, #E4EEEC);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #FFFFFF;
+    margin: 8px 0;
+    box-shadow: 0 1px 3px rgba(15, 26, 24, 0.06);
+}
+
+/* 顶部标题条 */
+.noah-plm-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #F0F7F6 0%, #FFFFFF 100%);
+    border-bottom: 1px solid var(--border, #E4EEEC);
+}
+/* 下载栏: 只在综合报告 tab 底部 */
+.noah-plm-dlbar {
+    margin-top: 20px; padding-top: 14px; border-top: 1px dashed #DCEDEA;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.noah-plm-dlbar .noah-plm-dl-label { font-size: 12.5px; color: #7B8B87; margin-right: 2px; }
+
+/* 报告下载按钮(右侧) */
+.noah-plm-head .noah-plm-dl { margin-left: auto; display: inline-flex; gap: 6px; }
+.noah-plm-dlbtn {
+    appearance: none; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: #007268; background: #fff; border: 1.5px solid rgba(0,176,160,.4);
+    border-radius: 999px; padding: 4px 12px; transition: all .16s;
+}
+.noah-plm-dlbtn:hover { background: #00B0A0; color: #fff; border-color: #00B0A0; }
+.noah-plm-dlbtn:active { transform: scale(.95); }
+
+/* 打印 / 存 PDF: 只显示当前报告, 展开全部分区 */
+@media print {
+    body * { visibility: hidden !important; }
+    .noah-plm-report.noah-plm-printing, .noah-plm-report.noah-plm-printing * { visibility: visible !important; }
+    .noah-plm-report.noah-plm-printing { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
+    .noah-plm-report.noah-plm-printing .noah-plm-tabs,
+    .noah-plm-report.noah-plm-printing .noah-plm-dl { display: none !important; }
+    .noah-plm-report.noah-plm-printing .noah-plm-panel { display: block !important; page-break-inside: avoid; }
+    .noah-plm-report.noah-plm-printing .noah-plm-panel::before {
+        content: attr(data-label); display: block; font-size: 15px; font-weight: 700;
+        color: #000; margin: 14px 0 6px; padding-top: 10px; border-top: 1px solid #ccc;
+    }
+}
+.noah-plm-head .noah-plm-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0F1A18;
+}
+.noah-plm-head .noah-plm-badge {
+    font-size: 12px;
+    color: #007268;
+    background: rgba(0, 176, 160, 0.10);
+    border: 1px solid rgba(0, 176, 160, 0.22);
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+/* Tab 条 */
+.noah-plm-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--border, #E4EEEC);
+    background: #FFFFFF;
+    overflow-x: auto;
+}
+.noah-plm-tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4A5C58;
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: color .18s ease, border-color .18s ease, background .18s ease;
+    white-space: nowrap;
+}
+.noah-plm-tab:hover { color: #007268; background: rgba(0,176,160,.05); }
+.noah-plm-tab.active { color: #00B0A0; border-bottom-color: #00B0A0; }
+/* 正在流式写入的分区: tab 名后一个脉冲绿点(直观看到多分区并发生成) */
+.noah-plm-tab.noah-plm-tab-streaming::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px;
+    border-radius: 50%; background: #00B0A0; vertical-align: middle;
+    animation: noahPlmPulse 1s ease-in-out infinite;
+}
+@keyframes noahPlmPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .noah-plm-tab.noah-plm-tab-streaming::after { animation: none; } }
+.noah-plm-tab:focus-visible { outline: 3px solid rgba(0,176,160,.55); outline-offset: -3px; }
+
+/* 内容区 */
+.noah-plm-panel {
+    display: none;
+    padding: 18px 20px;
+    line-height: 1.7;
+    color: #1F2D2A;
+    animation: noahPlmFade .18s ease;
+}
+.noah-plm-panel.active { display: block; }
+@keyframes noahPlmFade { from { opacity: .3; } to { opacity: 1; } }
+.noah-plm-panel h1, .noah-plm-panel h2, .noah-plm-panel h3 { color: #0F1A18; }
+.noah-plm-panel table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13.5px; }
+.noah-plm-panel th, .noah-plm-panel td { border: 1px solid #E4EEEC; padding: 7px 10px; text-align: left; }
+.noah-plm-panel th { background: #F0F7F6; color: #007268; font-weight: 600; }
+.noah-plm-panel a { color: #00B0A0; }
+.noah-plm-empty { color: #7B8B87; font-style: italic; }
+
+@media (prefers-reduced-motion: reduce) {
+    .noah-plm-tab, .noah-plm-panel { transition: none; animation: none; }
+}
+
+/* 分区首行标题(promoteTitle 提升出来的 h2)—— 突出层级, 与正文分明 */
+.noah-plm-panel > h2:first-child {
+    margin: 0 0 12px; padding-bottom: 8px; font-size: 16px; font-weight: 700;
+    color: #0F1A18; border-bottom: 2px solid rgba(0,176,160,.18);
+}
+
+/* [N] 可点击引用角标 */
+.noah-plm-panel .plm-cite {
+    color: #00B0A0; font-weight: 700; cursor: pointer; font-size: .72em;
+    padding: 0 1px; vertical-align: super; transition: color .15s;
+}
+.noah-plm-panel .plm-cite:hover { color: #007268; text-decoration: underline; }
+
+/* 点击 [N] 弹出的参考文献小窗 */
+.plm-cite-pop {
+    position: fixed; z-index: 99999; max-width: 380px;
+    background: #0F1A18; color: #EAF4F2; font-size: 12.5px; line-height: 1.55;
+    padding: 9px 12px; border-radius: 8px; box-shadow: 0 6px 24px rgba(15,26,24,.28);
+    animation: plmCitePopIn .14s ease; word-break: break-word;
+}
+@keyframes plmCitePopIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+
+/* 报告流式加载态 */
+.noah-plm-loading { display:flex; align-items:center; gap:10px; padding:20px; color:#4A5C58; font-size:14px; }
+.noah-plm-spin {
+    width:16px; height:16px; border:2.5px solid #D4E4E1; border-top-color:#00B0A0;
+    border-radius:50%; animation: noahSpin .7s linear infinite; flex:0 0 16px;
+}
+@keyframes noahSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){ .noah-plm-spin{ animation:none; } }

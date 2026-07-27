@@ -1,0 +1,44 @@
+FROM python:3.13-alpine@sha256:399babc8b49529dabfd9c922f2b5eea81d611e4512e3ed250d75bd2e7683f4b0
+
+LABEL maintainer="nesquena"
+LABEL description="Hermes Web UI client-only browser interface (Alpine candidate)"
+
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=utf-8 \
+    HERMES_WEBUI_HOST=0.0.0.0 \
+    HERMES_WEBUI_PORT=8787 \
+    HERMES_WEBUI_HEALTH_PROBE_PYTHON=1 \
+    HERMES_WEBUI_CLIENT_ONLY=1
+
+# CA certificates are required for HTTPS and SSO. Bash retains the
+# existing TLS-aware health probe without introducing Agent runtime tooling.
+RUN apk add --no-cache ca-certificates bash
+
+RUN addgroup -S -g 1000 hermeswebui \
+    && adduser -S -D -H -u 1000 -G hermeswebui -s /sbin/nologin hermeswebui \
+    && mkdir -p /app /home/hermeswebui/.hermes/webui /workspace \
+    && chown -R hermeswebui:hermeswebui /app /home/hermeswebui /workspace
+
+WORKDIR /app
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=hermeswebui:hermeswebui . /app
+
+ARG HERMES_VERSION=unknown
+RUN printf "__version__ = '%s'\n" "$HERMES_VERSION" > /app/api/_version.py \
+    && touch /.within_container
+
+USER hermeswebui
+
+EXPOSE 8787
+
+HEALTHCHECK --interval=30s --timeout=8s --start-period=10s --retries=3 \
+  CMD bash /app/scripts/lib/health_probe.sh localhost 8787 /health 2 >/dev/null || exit 1
+
+CMD ["python", "server.py"]

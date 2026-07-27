@@ -1,0 +1,7 @@
+ARG BASE_IMAGE=noah/plm-hermes-webui-client:plm-selection-patient-input-20260723
+FROM ${BASE_IMAGE}
+
+COPY --chown=hermeswebui:hermeswebui api/agent_health.py /app/api/agent_health.py
+COPY --chown=hermeswebui:hermeswebui api/gateway_chat.py /app/api/gateway_chat.py
+COPY --chown=hermeswebui:hermeswebui api/routes.py /app/api/routes.py
+COPY --chown=hermeswebui:hermeswebui api/plm_direct_bridge.py /app/api/plm_direct_bridge.py

@@ -1,0 +1,35 @@
+services:
+  hermes-webui:
+    image: ${PLM_WEBUI_IMAGE:?Set PLM_WEBUI_IMAGE to an immutable WebUI digest}
+    restart: unless-stopped
+    volumes:
+      - ./client-hermes-home:/home/hermeswebui/.hermes
+    environment:
+      HERMES_HOME: /home/hermeswebui/.hermes
+      HERMES_WEBUI_CLIENT_ONLY: "1"
+      HERMES_WEBUI_DEFAULT_THEME: ${HERMES_WEBUI_DEFAULT_THEME:-light}
+      HERMES_WEBUI_HOST: 0.0.0.0
+      HERMES_WEBUI_PORT: "8787"
+      HERMES_WEBUI_STATE_DIR: /home/hermeswebui/.hermes/webui
+      HERMES_WEBUI_EXTENSION_DIR: /home/hermeswebui/.hermes/webui/extensions/noah
+      HERMES_WEBUI_EXTENSION_MANIFEST: manifest.json
+      HERMES_DJANGO_URL: ${HERMES_DJANGO_URL:?Set the Client-side BizBackend URL}
+      HERMES_WEBUI_LOGIN_URL: ${HERMES_WEBUI_LOGIN_URL:?Set the Client-side Project Hub login URL}
+      HERMES_WEBUI_FRAME_ANCESTORS: ${HERMES_WEBUI_FRAME_ANCESTORS:?Set the Client-side Project Hub origin}
+      HERMES_WEBUI_TRUST_FORWARDED_PROTO: "1"
+      WANTED_UID: "1000"
+      WANTED_GID: "1000"
+    networks: [client]
+
+  plm-nginx:
+    image: nginx:1.29-alpine
+    depends_on: [hermes-webui]
+    ports:
+      - "${PLM_CLIENT_PORT:-8090}:80"
+    volumes:
+      - ./plm-nginx.client.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    networks: [client]
+
+networks:
+  client:

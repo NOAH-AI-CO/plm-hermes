@@ -1,0 +1,92 @@
+# pubtype_alias.yaml
+
+"Systematic Review": "Systematic Review"
+"Meta-Analysis": "Meta-Analysis"
+"Network Meta-Analysis": "Network Meta-Analysis"
+"Scoping Review": "Systematic Review"            # 常作为系统综述的变体，按需可单独设权重
+
+# RCT / 临床试验
+"Randomized Controlled Trial": "Randomized Controlled Trial"
+"Controlled Clinical Trial": "Randomized Controlled Trial"  # 老标签，等同或近似RCT
+"Pragmatic Clinical Trial": "Pragmatic Clinical Trial"
+"Equivalence Trial": "Equivalence Trial"
+"Clinical Trial": "Clinical Trial"
+"Clinical Trial, Phase I": "Clinical Trial, Phase I"
+"Clinical Trial, Phase II": "Clinical Trial, Phase II"
+"Clinical Trial, Phase III": "Clinical Trial, Phase III"
+"Clinical Trial, Phase IV": "Clinical Trial, Phase IV"
+"Adaptive Clinical Trial": "Clinical Trial"       # 可细分；先并入临床试验
+"Clinical Trial Protocol": "Clinical Trial Protocol"  # 协议类通常不做高权
+
+# 指南/共识
+"Practice Guideline": "Practice Guideline"
+"Guideline": "Guideline"
+"Consensus Development Conference": "Consensus Development Conference"
+"Consensus Development Conference, NIH": "Consensus Development Conference, NIH"
+
+# 观察性/多中心/验证
+"Observational Study": "Observational Study"
+"Multicenter Study": "Multicenter Study"
+"Validation Study": "Validation Study"
+"Comparative Study": "Comparative Study"
+"Clinical Study": "Observational Study"  # 宽泛标签，先归并到观察性
+
+# 信息性/体裁
+"Case Reports": "Case Reports"
+"Editorial": "Editorial"
+"Letter": "Letter"
+"News": "News"
+"Preprint": "Preprint"
+"English Abstract": "English Abstract"
+"Introductory Journal Article": "English Abstract"
+"Interview": "English Abstract"
+"Overall": "English Abstract"  # 少见，按信息性处理
+"Dataset": "Dataset"
+"Technical Report": "Technical Report"
+
+# 直接过滤或强降权
+"Retracted Publication": "Retracted Publication"
+"Retraction Notice": "Retraction Notice"
+"Published Erratum": "Published Erratum"                 # 常规降权
+"Expression of Concern": "Expression of Concern"         # 强降权
+"Corrected and Republished Article": "Corrected and Republished Article"  # 轻微降权
+"Retraction of Publication": "Retraction Notice"         # 归并到 Retraction Notice
+
+# 兽医（强降权）
+"Randomized Controlled Trial, Veterinary": "Randomized Controlled Trial, Veterinary"
+"Clinical Trial, Veterinary": "Clinical Trial, Veterinary"
+"Observational Study, Veterinary": "Observational Study, Veterinary"
+
+# 其它常见期刊体裁（不作为证据）
+"Journal Article": "Journal Article"
+"Review": "Systematic Review"  # 或者映射到 "Review" 并给中等权重（见注释）
+"Biography": "Other"
+"Historical Article": "Other"
+"Congress": "Other"
+"Lecture": "Other"
+"Personal Narrative": "Other"
+"Classical Article": "Other"
+"Directory": "Other"
+"Address": "Other"
+"Newspaper Article": "Other"
+"Clinical Conference": "Other"
+"Portrait": "Other"
+"Webcast": "Other"
+"Interactive Tutorial": "Other"
+"Periodical Index": "Other"
+"Dictionary": "Other"
+"Bibliography": "Other"
+"Government Publication": "Other"
+"Scientific Integrity Review": "Other"
+"Legislation": "Other"
+
+# 资助类型（不当作证据强度）
+"Research Support, Non-U.S. Gov't": "Funding"
+"Research Support, U.S. Gov't, P.H.S.": "Funding"
+"Research Support, U.S. Gov't, Non-P.H.S.": "Funding"
+"Research Support, N.I.H., Extramural": "Funding"
+"Research Support, N.I.H., Intramural": "Funding"
+"Research Support, American Recovery and Reinvestment Act": "Funding"
+
+# 纠错类
+"Duplicate Publication": "Duplicate Publication"
