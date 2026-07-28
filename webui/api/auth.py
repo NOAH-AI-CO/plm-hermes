@@ -690,13 +690,13 @@ def parse_cookie(handler) -> str | None:
     cookie_header = handler.headers.get('Cookie', '')
     if not cookie_header:
         return None
-    cookie = http.cookies.SimpleCookie()
-    try:
-        cookie.load(cookie_header)
-    except http.cookies.CookieError:
-        return None
-    morsel = cookie.get(_resolve_cookie_name())
-    return morsel.value if morsel else None
+
+    cookie_name = _resolve_cookie_name()
+    for item in cookie_header.split(';'):
+        name, separator, value = item.strip().partition('=')
+        if separator and name == cookie_name:
+            return value
+    return None
 
 
 def _safe_login_inner_next(query: str | None) -> str:
