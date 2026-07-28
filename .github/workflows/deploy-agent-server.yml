@@ -1,0 +1,32 @@
+name: Deploy PLM Hermes on Biz
+
+on:
+  push:
+    branches: [yiyong-prod]
+    paths:
+      - hermes-config/**
+      - skills/plm/**
+      - webui/**
+      - deploy/docker-compose.yml
+      - deploy/run-engine.sh
+      - deploy/host-deploy-biz.sh
+      - .github/workflows/deploy-agent-server.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-biz:
+    runs-on: [self-hosted, linux, x64, plm-biz]
+    environment:
+      name: biz-production
+    concurrency:
+      group: biz-plm-production
+      cancel-in-progress: false
+    steps:
+      - name: Deploy PLM Hermes release
+        run: |
+          set -euo pipefail
+          sudo /usr/local/sbin/plm-hermes-biz-deploy \
+            "$GITHUB_SHA" "plm-hermes-biz-${GITHUB_RUN_ID}"
