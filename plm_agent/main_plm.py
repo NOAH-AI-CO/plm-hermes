@@ -837,9 +837,16 @@ import os as _os, json as _json, uuid as _uuid, base64 as _b64, tempfile as _tmp
 import httpx as _httpx
 
 # PLM 面向所有 B 端登录用户开放, 不做成员/组织授权 —— 已移除成员管理。
-# _BK_BASES 仅用于 token 校验(调 /api/users/)。支持逗号分隔多后端(如 测试 8101 + 线上 8102),
-# 依次尝试、谁认就用谁 —— 让两个环境的账号都能用 PLM, 部署时一次配好不用切换。
-_BK_BASES = [b.strip() for b in _os.environ.get("PLM_BACKEND_BASE", "http://127.0.0.1:8000").split(",") if b.strip()]
+# _BK_BASES 仅用于 token 校验(调 /api/users)。支持逗号分隔多后端，依次尝试、谁认就用谁。
+_BK_BASES = []
+for _backend_base in (
+    _os.environ.get("PLM_BACKEND_BASE", "https://yiyong.noahai.co"),
+    _os.environ.get("PLM_BACKEND_FALLBACK_BASES", "https://yiyong2.noahai.co"),
+):
+    for _backend_url in _backend_base.split(","):
+        _backend_url = _backend_url.strip().rstrip("/")
+        if _backend_url and _backend_url not in _BK_BASES:
+            _BK_BASES.append(_backend_url)
 
 
 @app.get("/plm/me")
