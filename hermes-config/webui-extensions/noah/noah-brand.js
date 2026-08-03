@@ -8,7 +8,7 @@
     const BRAND = {
         name: "Noah Medical AI",
         botName: "Noah",
-        faviconUrl: "/extensions/logo.png",
+        faviconUrl: "extensions/logo.png",
     };
 
     // ============================================================
