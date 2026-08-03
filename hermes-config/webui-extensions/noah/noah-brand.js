@@ -162,9 +162,14 @@
     // 强制中文界面 + 亮色白底(用户要求)
     function forceLangAndLight() {
         try {
-            // 亮色白底:立即生效(去掉 dark class + 记住偏好)
-            localStorage.setItem("hermes-theme", "light");
-            document.documentElement.classList.remove("dark");
+            // 主题: 默认亮色白底, 但尊重用户用右下角开关所选(存 hermes-theme), 不再每次强制回亮色,
+            // 否则 setInterval 每 1.5s 抹掉 dark, 深色一点就被弹回白色。
+            var _t = localStorage.getItem("hermes-theme");
+            if (!_t) { _t = "light"; localStorage.setItem("hermes-theme", "light"); }
+            var _eff = _t === "system"
+                ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                : _t;
+            document.documentElement.classList.toggle("dark", _eff === "dark");
             // 中文:hermes-lang 在 boot 时读取, 改后需重载一次才全量翻译
             if (localStorage.getItem("hermes-lang") !== "zh-CN") {
                 localStorage.setItem("hermes-lang", "zh-CN");

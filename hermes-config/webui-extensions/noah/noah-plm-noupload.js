@@ -9,6 +9,10 @@
 (function () {
     "use strict";
 
+    // 关掉上游"长文本粘贴自动转成 pasted-text.md 附件"(用户只想纯文本粘贴)。
+    // boot.js 的 _shouldAttachLargePastedText 首行即判断此开关, 设 false 后大文本也按纯文本粘贴。
+    try { window._largeTextPasteAsAttachment = false; } catch (e) {}
+
     var css =
         "#btnAttach,#uploadBar,#uploadBarWrap,#attachTray{display:none!important;}";
     var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
