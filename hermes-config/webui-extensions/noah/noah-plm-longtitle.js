@@ -7,6 +7,18 @@
 (function () {
     "use strict";
 
+    // ---- 0) 编辑消息文本框: 保证 Cmd/Ctrl+A 能全选(防被全局快捷键截走)----
+    document.addEventListener("keydown", function (e) {
+        if ((e.key === "a" || e.key === "A") && (e.metaKey || e.ctrlKey)) {
+            var el = e.target;
+            if (el && el.classList && el.classList.contains("msg-edit-area")) {
+                el.select();
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }
+    }, true);
+
     // ---- 1) 项目 chip 悬停提示 ----
     function addChipTitles() {
         var chips = document.querySelectorAll(".project-chip");
