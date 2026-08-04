@@ -43,3 +43,6 @@
     user-select:text!important;
     cursor:text;
 }
+/* 选中高亮: 默认全局 ::selection 是淡 teal, 叠在 teal 编辑气泡上看不见 —— 换成明显的深色覆盖 */
+.msg-edit-area::selection{background:rgba(0,0,0,.42)!important;color:#fff!important;}
+.msg-edit-area::-moz-selection{background:rgba(0,0,0,.42)!important;color:#fff!important;}
