@@ -30,6 +30,7 @@
         "noah-plm-sidebar.js",
         "noah-plm-history-bridge.js",
         "noah-plm-noupload.js",
-        "noah-plm-no-autofill.js"
+        "noah-plm-no-autofill.js",
+        "noah-plm-session-menu.js"
     ]
 }
