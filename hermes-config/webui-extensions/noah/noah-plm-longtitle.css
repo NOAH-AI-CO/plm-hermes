@@ -1,0 +1,20 @@
+/* Noah PLM 超长标题处理(会话标题核心已截断+tooltip, 这里补项目 chip 与确认弹框) */
+
+/* 项目 chip: 超长名称截断成省略号(悬停看全名 via title, 由 noah-plm-longtitle.js 补) */
+.project-chip{max-width:180px;}
+.project-chip .color-dot{flex-shrink:0;}
+.project-chip > span:not(.color-dot){
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+}
+
+/* 确认弹框: 长内容(如超长项目名)折行, 过长则内部滚动, 不再横向撑破 */
+#appDialogDesc{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    white-space:normal;
+    max-height:45vh;
+    overflow-y:auto;
+}
