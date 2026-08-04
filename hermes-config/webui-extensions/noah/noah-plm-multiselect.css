@@ -1,0 +1,26 @@
+/* Noah PLM 多选重设计样式 */
+
+/* 底部原「选择」文字按钮 + 核心按需批量栏 + 核心底部选择条 都隐藏(用自建顶部常驻条替代) */
+.session-select-toggle{display:none!important;}
+#batchActionBar{display:none!important;}
+.session-select-bar{display:none!important;}
+
+/* 右上角多选图标:选中态高亮 */
+#noahMultiSelectBtn.on{background:var(--accent-bg-strong);color:var(--accent-text);}
+
+/* 自建常驻批量条:默认隐藏, 仅多选模式显示 */
+#noahSelBar{display:none;}
+html.noah-selmode #noahSelBar{
+    display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+    margin:6px 10px;padding:7px 10px;
+    border:1px solid var(--accent);border-radius:10px;
+    background:var(--accent-bg-strong);
+}
+#noahSelBar .ms-selall{display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;font-weight:600;color:var(--accent-text);user-select:none;white-space:nowrap;}
+#noahSelBar .ms-selall input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+#noahSelBar .ms-count{margin-right:auto;font-size:11px;color:var(--muted);white-space:nowrap;}
+#noahSelBar .ms-btn{font-size:11.5px;font-weight:600;border-radius:6px;padding:4px 8px;cursor:pointer;border:1px solid transparent;white-space:nowrap;}
+#noahSelBar .ms-btn:not(.ms-del):not(.ms-cancel){color:var(--accent-text);background:transparent;border-color:var(--accent);}
+#noahSelBar .ms-del{background:var(--error,#e5484d);color:#fff;}
+#noahSelBar .ms-btn:disabled{opacity:.4;cursor:not-allowed;}
+#noahSelBar .ms-cancel{background:transparent;border:none;color:var(--muted);font-size:14px;padding:2px 6px;line-height:1;}

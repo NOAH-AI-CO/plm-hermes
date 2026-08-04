@@ -12,7 +12,8 @@
         "noah-plm-admin.css",
         "noah-plm-composer.css",
         "noah-plm-clean.css",
-        "noah-plm-longtitle.css"
+        "noah-plm-longtitle.css",
+        "noah-plm-multiselect.css"
     ],
     "scripts": [
         "noah-plm-apibase.js",
@@ -33,6 +34,7 @@
         "noah-plm-noupload.js",
         "noah-plm-no-autofill.js",
         "noah-plm-session-menu.js",
-        "noah-plm-longtitle.js"
+        "noah-plm-longtitle.js",
+        "noah-plm-multiselect.js"
     ]
 }
