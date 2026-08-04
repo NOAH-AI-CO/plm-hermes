@@ -18,6 +18,22 @@
         }
     }
 
+    // ---- 1b) 项目名输入框: 限 30 字 + 关闭浏览器自动填充 ----
+    function hardenProjectInputs() {
+        var ins = document.querySelectorAll(".project-create-input");
+        for (var i = 0; i < ins.length; i++) {
+            var el = ins[i];
+            if (el.dataset.noahPn === "1") continue;
+            el.dataset.noahPn = "1";
+            el.maxLength = 30;
+            el.setAttribute("autocomplete", "off");
+            el.setAttribute("autocorrect", "off");
+            el.setAttribute("autocapitalize", "off");
+            el.setAttribute("spellcheck", "false");
+            el.setAttribute("name", "noah-project-name");
+        }
+    }
+
     // ---- 2) 右键菜单视口夹取 ----
     function clampMenu(m) {
         try {
@@ -72,12 +88,14 @@
             for (var j = 0; j < a.length; j++) scan(a[j]);
         }
         addChipTitles();
+        hardenProjectInputs();
         // 兜底: 若函数包裹未拦到(极端情况), 直接改 DOM 里的英文文案
         var desc = document.getElementById("appDialogDesc");
         if (desc) { var r = reword(desc.textContent); if (r !== desc.textContent) desc.textContent = r; }
     }).observe(document.body || document.documentElement, { childList: true, subtree: true });
 
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", addChipTitles);
-    else addChipTitles();
-    setInterval(addChipTitles, 2000);
+    function tick() { addChipTitles(); hardenProjectInputs(); }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
+    else tick();
+    setInterval(tick, 2000);
 })();

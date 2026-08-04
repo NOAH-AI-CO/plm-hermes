@@ -18,3 +18,7 @@
     max-height:45vh;
     overflow-y:auto;
 }
+
+/* 项目(文件夹)行: 原来太拥挤, 加大上下左右间距 */
+.project-bar{gap:7px;padding:8px 10px 10px;row-gap:7px;}
+.project-chip{padding:5px 10px;}
