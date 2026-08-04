@@ -150,6 +150,10 @@ nav.rail,
 #profileChip,
 #composerWorkspaceChip,
 .composer-yolo-pill,
+.composer-toolsets-wrap,
+#composerToolsetsWrap,
+.composer-toolsets-chip,
+#composerToolsetsChip,
 .composer-divider {
     display: none;
 }
