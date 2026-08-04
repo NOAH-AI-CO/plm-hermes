@@ -22,3 +22,17 @@
 /* 项目(文件夹)行: 原来太拥挤, 加大上下左右间距 */
 .project-bar{gap:7px;padding:8px 10px 10px;row-gap:7px;}
 .project-chip{padding:5px 10px;}
+
+/* 「选择」按钮默认高亮(产品 teal 强调色): 淡色底 + 描边, 更醒目 */
+.session-select-toggle{
+    opacity:1;
+    color:var(--accent-text);
+    background:var(--accent-bg-strong);
+    border:1px solid var(--accent);
+    font-weight:600;
+}
+.session-select-toggle:hover{
+    opacity:1;
+    background:var(--accent);
+    color:#fff;
+}
