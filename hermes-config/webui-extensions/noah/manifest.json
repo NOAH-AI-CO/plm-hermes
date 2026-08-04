@@ -29,6 +29,7 @@
         "noah-plm-humanize.js",
         "noah-plm-sidebar.js",
         "noah-plm-history-bridge.js",
-        "noah-plm-noupload.js"
+        "noah-plm-noupload.js",
+        "noah-plm-no-autofill.js"
     ]
 }
