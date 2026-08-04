@@ -36,3 +36,10 @@
     background:var(--accent);
     color:#fff;
 }
+
+/* 编辑消息文本框: 强制可鼠标选中/复制(覆盖任何继承来的 user-select:none) */
+.msg-edit-area{
+    -webkit-user-select:text!important;
+    user-select:text!important;
+    cursor:text;
+}
