@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # The client image has no Agent source, skills, terminal tooling, or dynamic
 # dependency installation. Bash is retained for the shared health probe.
-RUN apk add --no-cache bash ca-certificates \
+RUN apk add --no-cache bash ca-certificates libpq \
     && update-ca-certificates
 
 RUN addgroup -g 1000 hermeswebui \
@@ -27,8 +27,10 @@ RUN addgroup -g 1000 hermeswebui \
 WORKDIR /app
 
 COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir --upgrade pip setuptools \
-    && pip install --no-cache-dir -r requirements.txt
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev \
+    && pip install --no-cache-dir --upgrade pip setuptools \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apk del .build-deps
 
 COPY --chown=hermeswebui:hermeswebui . /app
 

@@ -1,0 +1,41 @@
+# WebUI 会话存储用的 Postgres(照 136 的 chat_sessions 模式)。
+# 与现有 compose.client.yaml 叠加使用:
+#   docker compose -f compose.client.yaml -f compose.postgres.yaml up -d
+#
+# 需在 .env 里提供:
+#   NOAH_WEBUI_DB_PASSWORD=<强密码>
+# 并把下方 hermes-webui 的两个 env(NOAH_DATABASE_URL / HERMES_WEBUI_SESSION_STORE)
+# 合并进现网 hermes-webui 服务(此文件已用同名服务键做叠加)。
+#
+# 回退:把 HERMES_WEBUI_SESSION_STORE 去掉或设为 json → 立刻回到 JSON sidecar 存储,无需改镜像。
+
+services:
+  webui-postgres:
+    image: postgres:16-alpine
+    container_name: noah-client-webui-postgres-1
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${NOAH_WEBUI_DB_NAME:-plm_webui}
+      POSTGRES_USER: ${NOAH_WEBUI_DB_USER:-noah_app}
+      POSTGRES_PASSWORD: ${NOAH_WEBUI_DB_PASSWORD:?set NOAH_WEBUI_DB_PASSWORD}
+    volumes:
+      - webui-postgres-data:/var/lib/postgresql/data
+    # 仅容器网络内可达, 不发布到宿主公网端口
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  hermes-webui:
+    environment:
+      HERMES_WEBUI_SESSION_STORE: postgres
+      NOAH_DATABASE_URL: postgresql://${NOAH_WEBUI_DB_USER:-noah_app}:${NOAH_WEBUI_DB_PASSWORD:?set NOAH_WEBUI_DB_PASSWORD}@webui-postgres:5432/${NOAH_WEBUI_DB_NAME:-plm_webui}
+    depends_on:
+      webui-postgres:
+        condition: service_healthy
+
+volumes:
+  webui-postgres-data:
