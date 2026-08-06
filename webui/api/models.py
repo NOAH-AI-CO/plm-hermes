@@ -220,6 +220,12 @@ def _persisted_session_ids_snapshot() -> frozenset[str]:
     the directory mtime changes, and let callers take the snapshot before
     entering critical sections.
     """
+    try:
+        from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+        if _pg_on():
+            return _pg_db().session_ids(_pg_owner())
+    except Exception:
+        pass
     global _PERSISTED_SESSION_IDS_CACHE
     try:
         dir_mtime_ns = SESSION_DIR.stat().st_mtime_ns
@@ -242,6 +248,12 @@ def _persisted_session_ids_snapshot() -> frozenset[str]:
 
 def _session_dir_has_persisted_session_files() -> bool:
     """Return True when the current session dir has at least one session JSON file."""
+    try:
+        from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+        if _pg_on():
+            return _pg_db().has_sessions(_pg_owner())
+    except Exception:
+        pass
     try:
         return any(not p.name.startswith('_') for p in SESSION_DIR.glob('*.json'))
     except Exception:
@@ -1240,6 +1252,18 @@ class Session:
         extra = {k: v for k, v in self.__dict__.items()
                  if k not in METADATA_FIELDS and k not in ('messages', 'tool_calls')
                  and not k.startswith('_')}
+        # Postgres 存储模式: payload dict 整存 chat_sessions, PG 为存储源, 跳过 sidecar/备份/索引。
+        try:
+            from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+        except Exception:
+            _pg_on = None
+        if _pg_on is not None and _pg_on():
+            if len(self.messages or []) == 0 and (self.active_stream_id or self.pending_user_message):
+                _existing = _pg_db().read_metadata(_pg_owner(), self.session_id)
+                if _existing and int(_existing.get('message_count') or 0) > 0:
+                    return  # #1558 同款: 拒绝用空消息快照覆盖已有对话
+            _pg_db().write_session(_pg_owner(), {**meta, **extra})
+            return
         payload = json.dumps({**meta, **extra}, ensure_ascii=False, indent=2)
 
         # ── #1558 backup safeguard ──────────────────────────────────────
@@ -1352,6 +1376,16 @@ class Session:
         # ``reachy-voice-*``); allow those but still reject dots/slashes.
         if not is_safe_session_id(sid):
             return None
+        try:
+            from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+        except Exception:
+            _pg_on = None
+        if _pg_on is not None and _pg_on():
+            data = _pg_db().read_session(_pg_owner(), sid)
+            if not data:
+                return None
+            data['messages'], _ = _collapse_adjacent_duplicate_partials(data.get('messages'))
+            return cls(**data)
         p = SESSION_DIR / f'{sid}.json'
         if not p.exists():
             return None
@@ -1381,6 +1415,17 @@ class Session:
         # path separators and traversal dots are not.
         if not is_safe_session_id(sid):
             return None
+        try:
+            from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+        except Exception:
+            _pg_on = None
+        if _pg_on is not None and _pg_on():
+            meta = _pg_db().read_metadata(_pg_owner(), sid)
+            if not meta:
+                return None
+            session = cls(**meta)
+            session._metadata_message_count = int(meta.get('message_count') or 0)
+            return session
         p = SESSION_DIR / f'{sid}.json'
         if not p.exists():
             return None
@@ -4536,6 +4581,23 @@ def _diag_stage(diag, name: str) -> None:
 def all_sessions(diag=None, *, include_lineage_metadata: bool = True):
     _diag_stage(diag, "all_sessions.active_streams")
     active_stream_ids = _active_stream_ids()
+    # Postgres 存储模式: 直接从 PG 按 owner 构建侧栏行, 绕开 index/文件回退。
+    try:
+        from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+    except Exception:
+        _pg_on = None
+    if _pg_on is not None and _pg_on():
+        rows = []
+        for _sid in _pg_db().session_ids_ordered(_pg_owner()):
+            try:
+                _s = Session.load_metadata_only(_sid)
+            except Exception:
+                _s = None
+            if _s is not None:
+                row = _s.compact()
+                row['is_streaming'] = _is_streaming_session(row.get('active_stream_id'), active_stream_ids)
+                rows.append(row)
+        return rows
     # Phase C: try index first for O(1) read; fall back to full scan
     _diag_stage(diag, "all_sessions.index_exists")
     if not SESSION_INDEX_FILE.exists():

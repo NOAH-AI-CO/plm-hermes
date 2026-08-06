@@ -13916,6 +13916,12 @@ def handle_post(handler, parsed) -> bool:
         from api.config import _evict_session_agent
         _evict_session_agent(sid)
         try:
+            from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+            if _pg_on():
+                _pg_db().delete_session(_pg_owner(), sid)
+        except Exception:
+            logger.debug("PG session delete failed for %s", sid, exc_info=True)
+        try:
             p = (SESSION_DIR / f"{sid}.json").resolve()
             p.relative_to(SESSION_DIR.resolve())
         except Exception:
