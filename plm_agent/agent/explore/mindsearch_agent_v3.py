@@ -3490,9 +3490,11 @@ Note: File content not pre-extracted. Use AttachmentDownload to download this fi
         # update final node query
         self._update_finalout_node(response=response, language=language)
 
-        # set all node as finished
+        # Mark unfinished nodes done, but keep explicit FAILED so the HITL
+        # thought board can still show which search steps failed.
         for node in response.search_graph.children:
-            node.processing_type = ProcessingType.DONE
+            if node.processing_type != ProcessingType.FAILED:
+                node.processing_type = ProcessingType.DONE
 
         # format source
         if not runtime_info.get('source'):

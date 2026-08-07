@@ -6,6 +6,7 @@ from datetime import datetime
 from agent.core.preset import AgentPreset
 import agent.explore.constants as constants
 from agent.explore.mindsearch_agent_v3 import MindSearchAgentV3
+from agent.explore.schema import ProcessingType
 from llm.base_model import BaseLLM
 from llm.azure_models import GPT51, GPT54Mini, GPT5Nano, GPT52
 from tools.core.base_tool import BaseTool
@@ -50,6 +51,17 @@ class MindSearchPubMedHitlAgent(MindSearchAgentV3):
     
     thinking_agent: MindSearchPubMedThinkingAgent = MindSearchPubMedThinkingAgent()
     final_output_agent: MindSearchFinalOutputAgent =  MindSearchFinalOutputAgent()
+
+    def _format_final_output(self, response, *args, **kwargs):
+        failed_nodes = [
+            node
+            for node in response.search_graph.children
+            if node.processing_type == ProcessingType.FAILED
+        ]
+        formatted_response = super()._format_final_output(response, *args, **kwargs)
+        for node in failed_nodes:
+            node.processing_type = ProcessingType.FAILED
+        return formatted_response
 
     def _format_thinking_prompt(
         self,
