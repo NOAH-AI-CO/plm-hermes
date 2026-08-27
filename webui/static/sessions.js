@@ -3999,6 +3999,11 @@ function _buildSessionRenameStarter(session, displayEl, renderDisplay){
           await api('/api/session/rename',{method:'POST',body:JSON.stringify({session_id:session.session_id,title:newTitle})});
         }
         applyTitle(newTitle);
+        // 乐观更新只改本地缓存, 缓存里没命中这条(或稍后被旧快照重绘)时, 侧栏就会把
+        // 改名前的标题画回去 —— 表现为"改了名但列表没变"。服务端此刻已是新标题, 拉一次即可。
+        if(typeof refreshSessionList==='function'){
+          Promise.resolve(refreshSessionList('session_rename')).catch(()=>{});
+        }
       }catch(err){
         applyTitle(oldTitle,false);
         const msg='Rename failed: '+(err&&err.message?err.message:String(err));
@@ -4019,7 +4024,20 @@ function _buildSessionRenameStarter(session, displayEl, renderDisplay){
     };
     inp.onblur=()=>{ if(_renamingSid===session.session_id) finish(true); };
     displayEl.replaceWith(inp);
-    setTimeout(()=>{inp.focus();inp.select();},10);
+    // 关菜单时焦点会回到触发按钮, 可能在这 10ms 之后把选中清掉(Firefox 尤其明显),
+    // 于是用户输入不是"替换"而是"插到开头", 标题就成了 "1原标题"。补一次延后重选,
+    // 用户一旦开始操作输入框就不再干预。
+    let _renameSelLocked=false;
+    ['keydown','mouseup','pointerup','input'].forEach(ev=>
+      inp.addEventListener(ev, ()=>{_renameSelLocked=true;}, {once:true})
+    );
+    const _selectAllTitle=()=>{
+      if(_renameSelLocked||!inp.isConnected) return;
+      try{ inp.focus({preventScroll:true}); inp.setSelectionRange(0, inp.value.length); }
+      catch(_){ try{ inp.focus(); inp.select(); }catch(__){} }
+    };
+    setTimeout(_selectAllTitle,10);
+    setTimeout(_selectAllTitle,90);
   };
 }
 

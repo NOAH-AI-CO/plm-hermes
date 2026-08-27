@@ -90,6 +90,7 @@
         }
     }
 
+    var _stopIdleSince = 0;
     // 常驻停止键: agent 流式/忙碌时显示在发送键左侧, 一键中止(不受输入框有无内容影响)。
     function syncStopBtn() {
         var send = document.getElementById("btnSend");
@@ -119,7 +120,19 @@
         var reportBusy = (window._noahReportStreams || []).some(function (c) {
             return c && c.wrap && document.body.contains(c.wrap);
         });
-        stop.style.display = (chatBusy || reportBusy) ? "inline-flex" : "none";
+        // 忙碌状态在收尾阶段会短暂反复(取消/重连时 activeStreamId 会先清后置), 这个函数
+        // 每 300ms 跑一次, 直接跟随就会让按钮反复出现消失, 表现为发送区抽搐(Firefox 明显)。
+        // 出现即时, 隐藏则要连续空闲 1 秒, 抖动就被吃掉了。
+        var busy = chatBusy || reportBusy;
+        if (busy) {
+            _stopIdleSince = 0;
+            if (stop.style.display === "none") stop.style.display = "inline-flex";
+            return;
+        }
+        if (!_stopIdleSince) _stopIdleSince = Date.now();
+        if (Date.now() - _stopIdleSince >= 1000 && stop.style.display !== "none") {
+            stop.style.display = "none";
+        }
     }
 
     // 发送带的 【模式·指南X】 前缀是给 agent 识别用的; 在渲染的用户气泡里把它视觉抹掉。
