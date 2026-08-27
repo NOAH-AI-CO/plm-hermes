@@ -40,6 +40,18 @@ def active_owner_id() -> str:
         return "default"
 
 
+def owner_for_profile(profile: Any) -> str:
+    """写入时的 owner 必须以会话自己的 profile 为准, 不能用"当前活跃 profile"。
+
+    active_owner_id() 依赖请求上下文; 后台线程/无身份上下文的保存会退化成 'default',
+    于是同一个会话被写进两个 owner。后果: 重命名只落在其中一份, 侧栏另一个视图读到旧
+    标题; 而错位那份的 payload.profile 与 owner 不符, 加载时 profile 校验不过, 直接
+    409 session_profile_mismatch —— 前端据此无限重试, 表现为界面狂闪。
+    """
+    name = str(profile or "").strip()
+    return name or active_owner_id()
+
+
 def _to_ts(value: Any, fallback: Optional[datetime] = None) -> datetime:
     # Session 的 created_at/updated_at 是 epoch float (time.time()); 也兼容 ISO 字符串。
     if isinstance(value, (int, float)) and value > 0:

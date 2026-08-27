@@ -1254,15 +1254,22 @@ class Session:
                  and not k.startswith('_')}
         # Postgres 存储模式: payload dict 整存 chat_sessions, PG 为存储源, 跳过 sidecar/备份/索引。
         try:
-            from api.pg_session_db import pg_enabled as _pg_on, get_db as _pg_db, active_owner_id as _pg_owner
+            from api.pg_session_db import (
+                pg_enabled as _pg_on,
+                get_db as _pg_db,
+                owner_for_profile as _pg_owner_for,
+            )
         except Exception:
             _pg_on = None
         if _pg_on is not None and _pg_on():
+            # 归属以会话自己的 profile 为准 —— 用"当前活跃 profile"会在无身份上下文的
+            # 保存里退化成 default, 把同一个会话写成两份(见 owner_for_profile)。
+            _owner = _pg_owner_for(getattr(self, 'profile', None))
             if len(self.messages or []) == 0 and (self.active_stream_id or self.pending_user_message):
-                _existing = _pg_db().read_metadata(_pg_owner(), self.session_id)
+                _existing = _pg_db().read_metadata(_owner, self.session_id)
                 if _existing and int(_existing.get('message_count') or 0) > 0:
                     return  # #1558 同款: 拒绝用空消息快照覆盖已有对话
-            _pg_db().write_session(_pg_owner(), {**meta, **extra})
+            _pg_db().write_session(_owner, {**meta, **extra})
             return
         payload = json.dumps({**meta, **extra}, ensure_ascii=False, indent=2)
 
