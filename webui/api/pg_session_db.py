@@ -9,6 +9,8 @@ payload 就是 Session.save() 序列化进 sidecar 的同一份 dict, 读回用 
 """
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import os
 import threading
 from datetime import datetime, timezone
@@ -30,8 +32,34 @@ def database_url_from_env() -> str:
     return str(os.environ.get("NOAH_DATABASE_URL") or DEFAULT_DATABASE_URL).strip()
 
 
+_OWNER_OVERRIDE: contextvars.ContextVar = contextvars.ContextVar("pg_owner_override", default=None)
+
+
+@contextlib.contextmanager
+def owner_scope(owner: Any):
+    """在一段代码里显式指定 owner, 不依赖"当前活跃 profile"。
+
+    侧栏列表的缓存重建跑在后台线程里, 那里没有请求上下文, get_active_profile_name()
+    会退化成 'default' —— PG 于是去查 default 名下的会话, 结果为空还被当成有效结果缓存
+    一个 TTL, 用户看到的就是"新建会话后整个列表消失, 十几秒后又回来"。路由已经知道正确
+    的 active_profile, 用这个作用域把它传下来。
+    """
+    name = str(owner or "").strip()
+    if not name:
+        yield
+        return
+    token = _OWNER_OVERRIDE.set(name)
+    try:
+        yield
+    finally:
+        _OWNER_OVERRIDE.reset(token)
+
+
 def active_owner_id() -> str:
     """当前请求的 owner = active profile 名 (SSO 身份派生); 拿不到则 'default'。"""
+    _override = _OWNER_OVERRIDE.get()
+    if _override:
+        return _override
     try:
         from api.profiles import get_active_profile_name
         name = str(get_active_profile_name() or "").strip()

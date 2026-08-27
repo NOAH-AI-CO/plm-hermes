@@ -2191,11 +2191,23 @@ def _build_session_list_cache_payload(
         )
 
     def _all_sessions_for_sidebar():
-        if _callable_accepts_kwarg(all_sessions, "include_lineage_metadata"):
-            return all_sessions(diag=diag, include_lineage_metadata=False)
-        # Focused tests and third-party callers sometimes monkeypatch
-        # routes.all_sessions with the historical diag-only signature.
-        return all_sessions(diag=diag)
+        # 这个构建函数会被后台线程调用(session-list-cache-rebuild), 那里没有请求上下文,
+        # PG 存储模式下 all_sessions() 的隐式 owner 会退化成 'default' → 查出空列表还被
+        # 缓存一个 TTL(新建会话后侧栏整体消失)。路由已解析出 active_profile, 显式传下去。
+        try:
+            from api.pg_session_db import owner_scope as _pg_owner_scope
+        except Exception:
+            import contextlib as _ctxlib
+
+            def _pg_owner_scope(_owner):
+                return _ctxlib.nullcontext()
+
+        with _pg_owner_scope(active_profile if not all_profiles else None):
+            if _callable_accepts_kwarg(all_sessions, "include_lineage_metadata"):
+                return all_sessions(diag=diag, include_lineage_metadata=False)
+            # Focused tests and third-party callers sometimes monkeypatch
+            # routes.all_sessions with the historical diag-only signature.
+            return all_sessions(diag=diag)
 
     diag_stage("all_sessions")
     webui_sessions = _all_sessions_for_sidebar()
