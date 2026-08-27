@@ -14,6 +14,66 @@
     var state = (window._noahPLM = window._noahPLM || { mode: "完整报告模式", org: "NCCN" });
     if (!state.org) state.org = "NCCN";
 
+    // 模式/指南范围原本是一份全局状态, 切会话时不跟着走: 在 A 会话选了完整报告模式,
+    // 去 B 会话选了快速模式, 再切回 A 仍显示快速模式(且发送时会带错的前缀)。
+    // 改为按会话记忆; 没有记录的会话(比如刷新后)从它自己的历史消息里推断 —— 每条用户
+    // 消息发送时都带了 【模式·指南X】 前缀, 那才是这个会话真正用过的设置。
+    var TAG_PARSE_RE = /【(快速模式|完整报告模式)(?:·指南([A-Za-z]+))?】/;
+    var _bySession = Object.create(null);
+    var _lastSid = null;
+    var _inferTries = 0;
+
+    function currentSid() {
+        try {
+            var st = (typeof S !== "undefined" && S) || window.S;
+            return (st && st.session && st.session.session_id) || null;
+        } catch (e) { return null; }
+    }
+
+    function inferFromMessages() {
+        try {
+            var st = (typeof S !== "undefined" && S) || window.S;
+            var msgs = (st && st.messages) || [];
+            for (var i = msgs.length - 1; i >= 0; i--) {
+                var m = msgs[i];
+                if (!m || m.role !== "user") continue;
+                var hit = TAG_PARSE_RE.exec(String(m.content || ""));
+                if (hit) return { mode: hit[1], org: hit[2] || state.org };
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function applyState(next) {
+        if (!next) return false;
+        if (next.mode) state.mode = next.mode;
+        if (next.org) state.org = next.org;
+        var bar = document.getElementById("noahComposerBar");
+        if (bar) paint(bar);
+        return true;
+    }
+
+    function rememberCurrent() {
+        var sid = currentSid();
+        if (sid) _bySession[sid] = { mode: state.mode, org: state.org };
+    }
+
+    function syncSessionState() {
+        var sid = currentSid();
+        if (sid !== _lastSid) {
+            if (_lastSid) _bySession[_lastSid] = { mode: state.mode, org: state.org };
+            _lastSid = sid;
+            _inferTries = 0;
+            if (sid && _bySession[sid]) { applyState(_bySession[sid]); return; }
+        }
+        // 切过来时 messages 可能还没加载完, 再试几拍(约 3 秒)。
+        if (sid && !_bySession[sid] && _inferTries < 10) {
+            _inferTries++;
+            var guess = inferFromMessages();
+            if (guess) { applyState(guess); _bySession[sid] = { mode: state.mode, org: state.org }; }
+        }
+    }
+
     function buildTag() {
         var t = "【" + state.mode;
         if (state.org) t += "·指南" + state.org;
@@ -42,7 +102,7 @@
         MODES.forEach(function (m) {
             var b = document.createElement("button");
             b.type = "button"; b.dataset.mode = m; b.textContent = m;
-            b.onclick = function () { state.mode = m; paint(bar); };
+            b.onclick = function () { state.mode = m; rememberCurrent(); paint(bar); };
             seg.appendChild(b);
         });
         row1.appendChild(seg);
@@ -56,6 +116,7 @@
             b.type = "button"; b.dataset.org = o; b.textContent = o;
             b.onclick = function () {
                 state.org = o;   // 单选必选, 始终保留一个(默认 NCCN)
+                rememberCurrent();
                 paint(bar);
             };
             row2.appendChild(b);
@@ -74,6 +135,7 @@
         if (boxEl && !document.getElementById("noahComposerBar")) {
             boxEl.insertBefore(build(), boxEl.firstChild);
         }
+        wrapFetchForTag();
         wrapSend();
         bindSendEvents();
         try { stripTagsInBubbles(); } catch (e) {}
@@ -172,15 +234,39 @@
         window._noahPLMBubbleObserver.observe(document.body, { childList: true, subtree: true });
     }
 
-    function injectTag() {
-        var box = document.getElementById("msg");
-        if (!box) return;
-        var value = box.value || "";
-        if (value.trim() && !/^【[^】]*】/.test(value.trim())) {
-            box.value = buildTag() + " " + value;
-            box.dispatchEvent(new Event("input", { bubbles: true }));
-        }
+    // 前缀只注入到发出去的请求体里, 不写进可见输入框 —— 它是给 agent 识别模式用的,
+    // 不该让医生看到(以前写进 textarea, 用户能看见 "【完整报告模式·指南NCCN】 你好",
+    // 而且它还会被服务端当成首条消息拿去生成会话标题, 把标题也污染了)。
+    function _tagPayload(bodyStr) {
+        var d;
+        try { d = JSON.parse(bodyStr); } catch (e) { return null; }
+        if (!d || typeof d !== "object") return null;
+        var key = ("message" in d) ? "message" : (("text" in d) ? "text" : null);
+        if (!key) return null;
+        var v = String(d[key] == null ? "" : d[key]);
+        if (!v.trim() || /^【[^】]*】/.test(v.trim())) return null;
+        d[key] = buildTag() + " " + v;
+        try { return JSON.stringify(d); } catch (e) { return null; }
     }
+
+    function wrapFetchForTag() {
+        if (window._noahPLMFetchTagWrapped || typeof window.fetch !== "function") return;
+        var of = window.fetch;
+        window.fetch = function (input, init) {
+            try {
+                var url = String((input && input.url) || input || "");
+                if (/\/api\/chat\/(start|steer)(\?|$)/.test(url) && init && typeof init.body === "string") {
+                    var next = _tagPayload(init.body);
+                    if (next) init = Object.assign({}, init, { body: next });
+                }
+            } catch (e) {}
+            return of.call(this, input, init);
+        };
+        window._noahPLMFetchTagWrapped = true;
+    }
+
+    // 旧的"写进输入框"实现保留为空操作: 发送路径已改为网络层注入。
+    function injectTag() {}
 
     // 兼容旧版仍暴露全局 send() 的 WebUI。
     function wrapSend() {
@@ -211,6 +297,6 @@
     else mount();
     observeMessageBubbles();
     setInterval(mount, 1500);
-    setInterval(function () { try { syncStopBtn(); } catch (e) {} try { fixSendTooltip(); } catch (e) {} }, 300);  // 停止键跟手 + 发送键中文提示
+    setInterval(function () { try { syncStopBtn(); } catch (e) {} try { fixSendTooltip(); } catch (e) {} try { syncSessionState(); } catch (e) {} }, 300);  // 停止键跟手 + 发送键中文提示
     console.log("[Noah] PLM composer bar v2 loaded");
 })();

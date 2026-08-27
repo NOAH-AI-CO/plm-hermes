@@ -4813,6 +4813,15 @@ def _strip_attached_files_marker(text: str) -> str:
     return re.sub(r"\n\n\[Attached files: [^\]]+\]$", "", str(text or "")).strip()
 
 
+# PLM: 发送时会给消息加 【快速模式·指南NCCN】 这类前缀供 agent 识别模式。它是内部标记,
+# 不能进用户可见的会话标题(否则标题全变成 "【完整报告模式·指南NCCN】 你好")。
+_PLM_MODE_TAG_RE = re.compile(r'^\s*【(?:快速模式|完整报告模式)[^】]*】\s*')
+
+
+def _strip_plm_mode_tag(text: str) -> str:
+    return _PLM_MODE_TAG_RE.sub('', str(text or ''), count=1)
+
+
 def title_from(messages, fallback: str='Untitled'):
     """Derive a session title from the first user message."""
     for m in messages:
@@ -4820,7 +4829,7 @@ def title_from(messages, fallback: str='Untitled'):
             c = m.get('content', '')
             if isinstance(c, list):
                 c = ' '.join(p.get('text', '') for p in c if isinstance(p, dict) and p.get('type') == 'text')
-            text = _strip_attached_files_marker(str(c))
+            text = _strip_plm_mode_tag(_strip_attached_files_marker(str(c)))
             if text:
                 return text[:64]
     return fallback
