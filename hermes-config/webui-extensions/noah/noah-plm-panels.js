@@ -337,7 +337,16 @@
         }
 
         es.onmessage = function (e) {
-            if (!document.body.contains(wrap)) { try { es.close(); } catch (_) {} return; }  // 面板已移除→停流, 防泄漏
+            // 面板不在 DOM 里 → 停流防泄漏。但消息列表重渲染会把面板"短暂"移出再放回
+            // (mount 复用同一节点), 早先这里直接 return, 流被永久关掉且不 reconcile,
+            // 面板回到页面后就一直停在"本节生成中…"。改为交给 reconcile 用后端权威
+            // 全文补齐 —— renderTabsInto 写的是同一个 wrap 节点, 即使此刻是游离的也有效。
+            if (!document.body.contains(wrap)) {
+                try { es.close(); } catch (_) {}
+                _finish();
+                reconcile(rid, wrap);
+                return;
+            }
             var d; try { d = JSON.parse(e.data); } catch (_) { return; }
             var ev = d.event, p = d.payload || {};
             if (ev === "section_chunk") {
