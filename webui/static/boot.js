@@ -14,6 +14,34 @@
 // cancelStream: stop the active chat stream.
 // See docs/rfcs/webui-run-state-consistency-contract.md (Invariants #2, #4)
 // for the owner-aware + terminal-settle rationale.
+// 取消过的 stream id 记一小段时间。服务端在会话 SSE 重连时会重放 server_turn_started,
+// 客户端据此又去挂载这条已经取消的流, 挂载失败 → 重连 → 再重放, 每秒二十几轮,
+// 界面表现为点停止后整体抽搐(生产实测 50 请求/秒, 持续约 5 秒)。
+// 见 messages.js 的 server_turn_started / 状态轮询重挂载处。
+const _CANCELLED_STREAM_TTL_MS = 120000;
+const _cancelledStreamIds = new Map();
+function markStreamCancelled(streamId){
+  const id = String(streamId || '');
+  if(!id) return;
+  const now = Date.now();
+  _cancelledStreamIds.set(id, now + _CANCELLED_STREAM_TTL_MS);
+  if(_cancelledStreamIds.size > 64){
+    for(const [k, exp] of _cancelledStreamIds){ if(exp <= now) _cancelledStreamIds.delete(k); }
+  }
+}
+function wasStreamRecentlyCancelled(streamId){
+  const id = String(streamId || '');
+  if(!id) return false;
+  const exp = _cancelledStreamIds.get(id);
+  if(!exp) return false;
+  if(exp <= Date.now()){ _cancelledStreamIds.delete(id); return false; }
+  return true;
+}
+if(typeof window !== 'undefined'){
+  window.markStreamCancelled = markStreamCancelled;
+  window.wasStreamRecentlyCancelled = wasStreamRecentlyCancelled;
+}
+
 async function cancelStream(reason){
   const sid = S.session && S.session.session_id;
   const streamId = S.activeStreamId;
@@ -26,6 +54,7 @@ async function cancelStream(reason){
   // LOCAL SSE transport via closeLiveStream() and never call /api/chat/cancel,
   // so they never interrupt the backend agent/tool run. (#5345)
   const _reason = reason || 'explicit-cancel';
+  markStreamCancelled(streamId);
   if(typeof console !== 'undefined' && console.info){
     console.info('[stream] cancel requested', {reason:_reason, streamId, sessionId:sid});
   }
@@ -67,6 +96,7 @@ async function cancelSessionStream(session){
   if(!streamId||!sid) return;
   // Explicit sidebar "Stop response" — log provenance for the same reason as
   // cancelStream(). (#5345)
+  markStreamCancelled(streamId);
   if(typeof console !== 'undefined' && console.info){
     console.info('[stream] cancel requested', {reason:'sidebar-stop', streamId, sessionId:sid});
   }

@@ -6022,7 +6022,7 @@ function attachLiveStream(activeSid, streamId, uploaded=[], options={}){
                 ? _isMessageReaderUnpinned()
                 : (typeof _messageUserUnpinned!=='undefined' && _messageUserUnpinned));
             clearLiveToolCards();if(!assistantText)removeThinking();
-            const cancelAgentName=(assistantDisplayName()+'').trim()||'Hermes';
+            const cancelAgentName=(assistantDisplayName()+'').trim()||'PLM 临床助手';
             S.messages.push({role:'assistant',content:`**Task cancelled:** Task cancelled.\n\n*The run was cancelled by the user before ${cancelAgentName} finished. No provider failure occurred.*`,provider_details:'Task cancelled.',provider_details_label:'Cancellation details',_error:true});
             _attachProjectedAnchorSceneToLastAssistant(S.messages);
             renderMessages({preserveScroll:true});
@@ -6300,7 +6300,7 @@ function attachLiveStream(activeSid, streamId, uploaded=[], options={}){
 }
 
 function transcript(){
-  const lines=[`# Hermes session ${S.session?.session_id||''}`,``,
+  const lines=[`# PLM-Hermes 会话 ${S.session?.session_id||''}`,``,
     `Workspace: ${S.session?.workspace||''}`,`Model: ${S.session?.model||''}`,``];
   for(const m of S.messages){
     if(!m||m.role==='tool')continue;
@@ -6889,6 +6889,9 @@ function _attachServerInitiatedStream(sid, streamId, recovered) {
     // Already rendering this exact stream — treat as success so the poll
     // stops cleanly (renderer owns the stream from here).
     if (S.activeStreamId === streamId) return true;
+    // 同 server_turn_started: 已取消的流不再重新挂载(否则轮询会一直把它拉活)。
+    if (typeof window !== 'undefined' && typeof window.wasStreamRecentlyCancelled === 'function'
+        && window.wasStreamRecentlyCancelled(streamId)) return true;
     const existingLive = (typeof LIVE_STREAMS !== 'undefined') ? LIVE_STREAMS[sid] : null;
     if (existingLive && existingLive.streamId === streamId) return true;
     S.busy = true;
@@ -7187,6 +7190,10 @@ function startSessionStream(sid) {
         // already attached to this very stream). attachLiveStream is
         // idempotent per (sid, streamId); bail if we're already on it.
         if (S.activeStreamId === streamId) return;
+        // 这条流刚被用户取消: 服务端在 SSE 重连时仍会重放 server_turn_started, 若照单
+        // 全收就会去挂载一条已死的流, 失败后重连再重放 —— 每秒二十几轮的抽搐由此而来。
+        if (typeof window !== 'undefined' && typeof window.wasStreamRecentlyCancelled === 'function'
+            && window.wasStreamRecentlyCancelled(streamId)) return;
         const existingLive = (typeof LIVE_STREAMS !== 'undefined') ? LIVE_STREAMS[sid] : null;
         if (existingLive && existingLive.streamId === streamId) return;
         // Mirror the loadSession reattach setup. For a fresh frame the turn
