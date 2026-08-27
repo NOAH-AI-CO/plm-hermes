@@ -11368,15 +11368,22 @@ def handle_get(handler, parsed) -> bool:
         return True
 
     if parsed.path == "/api/auth/status":
-        from api.auth import _passkey_feature_flag_enabled, get_password_hash, is_auth_enabled, is_oidc_auth_enabled, parse_cookie, verify_session
+        from api.auth import _passkey_feature_flag_enabled, csrf_token_for_session, get_password_hash, is_auth_enabled, is_oidc_auth_enabled, parse_cookie, verify_session
         from api.passkeys import registered_credentials
 
         logged_in = False
         auth_enabled = is_auth_enabled()
         oidc_enabled = is_oidc_auth_enabled()
+        current_csrf = ""
         if auth_enabled:
             cv = parse_cookie(handler)
             logged_in = bool(cv and verify_session(cv))
+            # The shell bakes its CSRF token in at page load; the cookie can rotate
+            # under it (SSO refresh, restart), which fails every later unsafe request
+            # with "Session expired". Expose the live token so the client can re-sync
+            # without a reload. Safe: same-origin GET already requires the cookie.
+            if logged_in:
+                current_csrf = csrf_token_for_session(cv) or ""
         passkey_flag = _passkey_feature_flag_enabled()
         passkeys = registered_credentials() if passkey_flag else []
         password_auth_enabled = get_password_hash() is not None
@@ -11390,6 +11397,7 @@ def handle_get(handler, parsed) -> bool:
             "passkeys_count": len(passkeys),
             "passkey_feature_flag": passkey_flag,
             "auth_disabled_acknowledged": bool(load_settings().get("auth_disabled_acknowledged")) if not auth_enabled else False,
+            "csrf_token": current_csrf,
         })
 
     if parsed.path == "/api/plm/admin/status":

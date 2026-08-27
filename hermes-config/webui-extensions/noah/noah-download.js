@@ -10,11 +10,10 @@
     const BTN_ID = "noah-download-workspace";
 
     function getCurrentSessionId() {
-        // 从全局状态拿（hermes-webui 里 S.session.session_id）
+        // webui 的全局 S 是脚本作用域变量, 未必挂在 window 上, 两种都试。
         try {
-            if (window.S && window.S.session && window.S.session.session_id) {
-                return window.S.session.session_id;
-            }
+            var st = (typeof S !== "undefined" && S) || window.S;
+            if (st && st.session && st.session.session_id) return st.session.session_id;
         } catch (e) {}
         // 兜底：从 URL 抓
         const m = location.pathname.match(/\/session\/([a-f0-9]+)/);
@@ -28,7 +27,7 @@
         try {
             if (window.__noahCurrentDir) return window.__noahCurrentDir;
         } catch (e) {}
-        return "";
+        return ".";
     }
 
     function triggerDownload() {
@@ -38,10 +37,15 @@
             return;
         }
         const path = currentWorkspacePath();
-        const url = "/api/folder/download?session_id=" + encodeURIComponent(sid)
-                  + "&path=" + encodeURIComponent(path);
-        // 直接跳转触发下载
-        window.location.href = url;
+        // 绝对 /api/... 会打到站点根(反代到 Django), 必须按 webui 挂载点解析。
+        const url = new URL("api/folder/download?session_id=" + encodeURIComponent(sid)
+                  + "&path=" + encodeURIComponent(path), document.baseURI || location.href).href;
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { document.body.removeChild(a); }, 100);
     }
 
     function ensureButton() {

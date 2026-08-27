@@ -1247,6 +1247,12 @@ async function newSession(flash, options={}){
   })();
   try{
     return await _newSessionInFlight;
+  }catch(e){
+    // Without this the rejection is silent: the pending status clears but no new
+    // session appears and nothing says why (#new-session-hang).
+    const _msg=(e&&e.message)?e.message:String(e);
+    if(typeof showToast==='function') showToast((t('new_session_failed')||'New conversation failed: ')+_msg,6000,'error');
+    throw e;
   }finally{
     _newSessionInFlight=null;
     _setNewSessionPending(false);
@@ -4120,7 +4126,8 @@ function _openSessionActionMenu(session, anchorEl){
   const isExternalSession = isMessagingSession || isCliSession;
   const menu=document.createElement('div');
   menu.className='session-action-menu';
-  _appendSessionCopyLinkAction(menu, session);
+  // PLM: 复制的是内部 session:// 引用, 对医生没有意义, 不在菜单里暴露。
+  // _appendSessionCopyLinkAction(menu, session);
   if(isReadOnly){
     _appendSessionExportHtmlAction(menu, session);
     _mountSessionActionMenu(menu, session, anchorEl);

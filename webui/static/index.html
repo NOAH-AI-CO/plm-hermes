@@ -46,13 +46,44 @@
       return !/\/api\/(auth\/login|csp-report)$/.test(url.pathname);
     }catch(_){return false;}
   }
+  // The baked-in token dies when the auth cookie rotates under an open tab (SSO
+  // refresh, server restart), turning every later POST into a dead-end
+  // "Session expired". Re-sync from /api/auth/status once and replay instead.
+  var refreshing=null;
+  function refreshToken(){
+    if(refreshing)return refreshing;
+    refreshing=originalFetch(new URL('api/auth/status',document.baseURI||location.href).href,{credentials:'include'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        var next=d&&d.csrf_token;
+        if(next&&next!==token){token=next;cfg.csrfToken=next;return next;}
+        return null;
+      })
+      .catch(function(){return null;})
+      .then(function(v){refreshing=null;return v;});
+    return refreshing;
+  }
+  function withToken(input,init,tok,force){
+    var opts=init?Object.assign({},init):{};
+    var headers=new Headers(opts.headers!==undefined?opts.headers:((input&&input.headers)||{}));
+    if(force||!headers.has('X-Hermes-CSRF-Token'))headers.set('X-Hermes-CSRF-Token',tok);
+    opts.headers=headers;
+    return opts;
+  }
   window.fetch=function(input,init){
     if(sameOriginUnsafe(input,init)){
-      var opts=init?Object.assign({},init):{};
-      var headers=new Headers(opts.headers!==undefined?opts.headers:((input&&input.headers)||{}));
-      if(!headers.has('X-Hermes-CSRF-Token'))headers.set('X-Hermes-CSRF-Token',token);
-      opts.headers=headers;
-      return originalFetch(input,opts);
+      // A Request body is single-use, so a retry needs the original input intact.
+      var replayable=(typeof input==='string'||input instanceof URL);
+      return originalFetch(input,withToken(input,init,token)).then(function(res){
+        if(res.status!==403||!replayable)return res;
+        return res.clone().json().catch(function(){return null;}).then(function(body){
+          var err=body&&body.error||'';
+          if(!/session expired|cross-origin/i.test(err))return res;
+          return refreshToken().then(function(next){
+            return next?originalFetch(input,withToken(input,init,next,true)):res;
+          });
+        });
+      });
     }
     return originalFetch(input,init);
   };

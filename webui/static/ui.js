@@ -18244,8 +18244,8 @@ function _showFileContextMenu(e, item){
     dlItem.onmouseleave=()=>dlItem.style.background='';
     dlItem.onclick=()=>{
       menu.remove();
-      const url='/api/folder/download?session_id='+encodeURIComponent(S.session.session_id)
-              + '&path='+encodeURIComponent(item.path||'');
+      const url=new URL('api/folder/download?session_id='+encodeURIComponent(S.session.session_id)
+              + '&path='+encodeURIComponent(item.path||''),document.baseURI||location.href).href;
       window.location.href=url;
     };
     menu.appendChild(dlItem);

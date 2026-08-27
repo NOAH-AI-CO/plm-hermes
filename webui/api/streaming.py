@@ -1093,7 +1093,10 @@ def _preferred_agent_display_name() -> str:
 
 def _preferred_agent_display_name_for_session(session) -> str:
     profile = str(getattr(session, 'profile', '') or '').strip()
-    if profile and profile != 'default':
+    # PLM: per-user profiles are named u_<sha256[:16]>; that id is an internal
+    # detail and must never surface in user-facing copy (static/ui.js does the
+    # same check in assistantDisplayName()).
+    if profile and profile != 'default' and not re.fullmatch(r'u_[0-9a-f]{16}', profile):
         return profile[:1].upper() + profile[1:]
     return _preferred_agent_display_name()
 

@@ -13,7 +13,8 @@
         "noah-plm-composer.css",
         "noah-plm-clean.css",
         "noah-plm-longtitle.css",
-        "noah-plm-multiselect.css"
+        "noah-plm-multiselect.css",
+        "noah-plm-hide-ui.css"
     ],
     "scripts": [
         "noah-plm-apibase.js",

@@ -1776,7 +1776,7 @@ $('btnDownload').onclick=()=>{
 };
 $('btnExportJSON').onclick=()=>{
   if(!S.session)return;
-  const url=`/api/session/export?session_id=${encodeURIComponent(S.session.session_id)}`;
+  const url=new URL(`api/session/export?session_id=${encodeURIComponent(S.session.session_id)}`,document.baseURI||location.href).href;
   const a=document.createElement('a');a.href=url;
   a.download=`hermes-${S.session.session_id}.json`;a.click();
 };
@@ -1806,7 +1806,7 @@ function exportSessionHTML(session){
   // Drop empties so the inlined fallback keeps working for anything we couldn't read.
   const clean={};for(const k in palette){if(palette[k])clean[k]=palette[k];}
   const paletteB64=btoa(unescape(encodeURIComponent(JSON.stringify(clean))));
-  const url=`/api/session/export?session_id=${encodeURIComponent(sid)}&format=html&theme=${theme}&palette=${encodeURIComponent(paletteB64)}`;
+  const url=new URL(`api/session/export?session_id=${encodeURIComponent(sid)}&format=html&theme=${theme}&palette=${encodeURIComponent(paletteB64)}`,document.baseURI||location.href).href;
   const a=document.createElement('a');a.href=url;
   a.download=`hermes-${sid}.html`;a.click();
 }

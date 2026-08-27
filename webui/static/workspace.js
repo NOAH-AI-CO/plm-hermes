@@ -241,7 +241,20 @@ function _workspacePathIsReadOnly(path){
   return !!_workspaceEscapeGrantForPath(path || S.currentDir || '.');
 }
 
+// Workspace URLs are also consumed outside api() (a.href downloads, img/iframe
+// src, window.open). api() strips the leading slash so subpath mounts work; these
+// raw consumers do not, so resolve against document.baseURI here instead.
+function _wsResolveUrl(url){
+  if(!url) return url;
+  try{ return new URL(String(url).replace(/^\//,''), document.baseURI||location.href).href; }
+  catch(_){ return url; }
+}
+
 function _workspaceRouteForPath(path, kind, opts={}){
+  return _wsResolveUrl(_workspaceRouteForPathRaw(path, kind, opts));
+}
+
+function _workspaceRouteForPathRaw(path, kind, opts={}){
   if(!S.session) return '';
   const normalizedPath = _normalizeWorkspaceRelPath(path);
   const grant = _workspaceEscapeGrantForPath(normalizedPath);

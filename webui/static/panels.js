@@ -2768,7 +2768,7 @@ function _kanbanStartEventStream(){
   // login change, etc.).
   if (_kanbanEventSource) { try { if(_kanbanEventSource.readyState!==2)_kanbanEventSource.close(); } catch(_) {} _kanbanEventSource = null; }
   const since = Number(_kanbanLatestEventId || 0);
-  let url = '/api/kanban/events/stream' + _kanbanBoardQuery({since: since});
+  let url = new URL('api/kanban/events/stream' + _kanbanBoardQuery({since: since}),document.baseURI||location.href).href;
   let es;
   try {
     es = new EventSource(url);

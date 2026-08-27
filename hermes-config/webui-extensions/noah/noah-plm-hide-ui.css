@@ -1,0 +1,22 @@
+/* PLM 医生端不提供的通用能力:分叉会话、上下文用量、朗读、语音输入。
+   麦克风还会在 http 页面直接报"访问被拒绝",一并去掉。 */
+
+/* 消息操作条:从此处分叉 / 收听 */
+button.msg-action-btn[onclick^="forkFromMessage"],
+.msg-tts-btn {
+    display: none !important;
+}
+
+/* 上下文窗口用量指示器 */
+#ctxIndicator,
+#composerMobileContextAction {
+    display: none !important;
+}
+
+/* 语音输入与语音模式 */
+#btnMic,
+#btnVoiceMode,
+#micStatus,
+#voiceModeBar {
+    display: none !important;
+}
