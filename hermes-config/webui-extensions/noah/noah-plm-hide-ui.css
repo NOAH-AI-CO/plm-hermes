@@ -20,3 +20,10 @@ button.msg-action-btn[onclick^="forkFromMessage"],
 #voiceModeBar {
     display: none !important;
 }
+
+/* 选中聊天文字后弹出的「用所选内容回复」: 会把选区当"上下文N"塞进提问,
+   医生只是划词阅读/复制时极易误触, 塞进去的还常是卡片标签(如 GUIDELINES)这种噪声。 */
+#selectedTextReplyBtn,
+.selected-text-reply-btn {
+    display: none !important;
+}

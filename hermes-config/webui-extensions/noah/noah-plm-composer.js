@@ -106,10 +106,19 @@
             };
             send.parentNode.insertBefore(stop, send);
         }
-        // 忙碌 = 主聊天流在跑(btnSend 的 data-action) 或 报告流在跑(报告独立于聊天流)。
-        var act = send.dataset ? (send.dataset.action || "") : "";
-        var chatBusy = act === "stop" || act === "steer" || act === "interrupt" || act === "queue";
-        var reportBusy = !!window._noahReportStreaming;
+        // 只在"当前正看的这个会话"真有流在跑时才显示。
+        // 早先用 btnSend 的 data-action + 全局 _noahReportStreaming 判定, 两者都是全局的:
+        // 别的会话在跑时新建/切到空会话, 这里会误显示停止键(data-action 会是 queue)。
+        // S.activeStreamId 由 loadSession/newSession 按当前会话维护, 是准确信号;
+        // 报告流则看它的面板节点还在不在当前视图里。
+        var chatBusy = false;
+        try {
+            var st = (typeof S !== "undefined" && S) || window.S;
+            chatBusy = !!(st && st.activeStreamId);
+        } catch (e) {}
+        var reportBusy = (window._noahReportStreams || []).some(function (c) {
+            return c && c.wrap && document.body.contains(c.wrap);
+        });
         stop.style.display = (chatBusy || reportBusy) ? "inline-flex" : "none";
     }
 
