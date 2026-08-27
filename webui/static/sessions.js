@@ -4129,7 +4129,8 @@ function _openSessionActionMenu(session, anchorEl){
   // PLM: 复制的是内部 session:// 引用, 对医生没有意义, 不在菜单里暴露。
   // _appendSessionCopyLinkAction(menu, session);
   if(isReadOnly){
-    _appendSessionExportHtmlAction(menu, session);
+    // 同上: 导出 HTML 不在医生端暴露。
+    // _appendSessionExportHtmlAction(menu, session);
     _mountSessionActionMenu(menu, session, anchorEl);
     return;
   }
@@ -4218,10 +4219,12 @@ function _openSessionActionMenu(session, anchorEl){
       }
     ));
   }
-  if(!isExternalSession){
-    _appendSessionDuplicateAction(menu, session);
-  }
-  _appendSessionExportHtmlAction(menu, session);
+  // PLM: 复制会话 / 导出 HTML / 重新生成标题 医生端用不到, 且都依赖对话内容,
+  // 空会话或内网受限环境下点了就报错(见 noah-plm-session-menu.js 当初的置灰兜底)。
+  // if(!isExternalSession){
+  //   _appendSessionDuplicateAction(menu, session);
+  // }
+  // _appendSessionExportHtmlAction(menu, session);
   if(session.active_stream_id){
     menu.appendChild(_buildSessionAction(
       t('session_stop_response'),
@@ -4236,34 +4239,34 @@ function _openSessionActionMenu(session, anchorEl){
   }
   // Title regeneration stays available for writable imported sessions.
   // Read-only sessions return earlier through the shared action-menu guard.
-  menu.appendChild(_buildSessionAction(
-    t('session_title_regenerate'),
-    t('session_title_regenerate_desc'),
-    ICONS.spark,
-    async()=>{
-      closeSessionActionMenu();
-      try{
-        if(typeof showToast==='function') showToast(t('session_title_regenerating'), 1600);
-        const requestOpts={method:'POST',body:JSON.stringify({session_id:session.session_id})};
-        const timeoutMs=await _manualTitleRegenerateTimeoutMs();
-        if(timeoutMs) requestOpts.timeoutMs=timeoutMs;
-        const response=await api('/api/session/title/regenerate',requestOpts);
-        const nextTitle=(response&&response.title)||(response&&response.session&&response.session.title)||'';
-        if(nextTitle){
-          session.title=nextTitle;
-          const cached=(_allSessions||[]).find(item=>item&&item.session_id===session.session_id);
-          if(cached) cached.title=nextTitle;
-          if(S.session&&S.session.session_id===session.session_id){S.session.title=nextTitle;syncTopbar();}
-          renderSessionListFromCache();
-        }
-        if(typeof showToast==='function') showToast(t('session_title_regenerated', nextTitle||t('untitled')), 2400);
-      }catch(err){
-        const msg=t('session_title_regenerate_failed')+(err&&err.message?err.message:String(err));
-        setStatus(msg);
-        if(typeof showToast==='function') showToast(msg,3000,'error');
-      }
-    }
-  ));
+  // menu.appendChild(_buildSessionAction(
+  //   t('session_title_regenerate'),
+  //   t('session_title_regenerate_desc'),
+  //   ICONS.spark,
+  //   async()=>{
+  //     closeSessionActionMenu();
+  //     try{
+  //       if(typeof showToast==='function') showToast(t('session_title_regenerating'), 1600);
+  //       const requestOpts={method:'POST',body:JSON.stringify({session_id:session.session_id})};
+  //       const timeoutMs=await _manualTitleRegenerateTimeoutMs();
+  //       if(timeoutMs) requestOpts.timeoutMs=timeoutMs;
+  //       const response=await api('/api/session/title/regenerate',requestOpts);
+  //       const nextTitle=(response&&response.title)||(response&&response.session&&response.session.title)||'';
+  //       if(nextTitle){
+  //         session.title=nextTitle;
+  //         const cached=(_allSessions||[]).find(item=>item&&item.session_id===session.session_id);
+  //         if(cached) cached.title=nextTitle;
+  //         if(S.session&&S.session.session_id===session.session_id){S.session.title=nextTitle;syncTopbar();}
+  //         renderSessionListFromCache();
+  //       }
+  //       if(typeof showToast==='function') showToast(t('session_title_regenerated', nextTitle||t('untitled')), 2400);
+  //     }catch(err){
+  //       const msg=t('session_title_regenerate_failed')+(err&&err.message?err.message:String(err));
+  //       setStatus(msg);
+  //       if(typeof showToast==='function') showToast(msg,3000,'error');
+  //     }
+  //   }
+  // ));
   if(!isExternalSession){
     if(session.worktree_path){
       menu.appendChild(_buildSessionAction(

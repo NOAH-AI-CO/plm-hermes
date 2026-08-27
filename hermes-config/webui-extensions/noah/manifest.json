@@ -34,7 +34,6 @@
         "noah-plm-history-bridge.js",
         "noah-plm-noupload.js",
         "noah-plm-no-autofill.js",
-        "noah-plm-session-menu.js",
         "noah-plm-longtitle.js",
         "noah-plm-multiselect.js",
         "noah-plm-gateway-banner.js"
