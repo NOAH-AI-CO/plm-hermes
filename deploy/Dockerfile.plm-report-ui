@@ -1,0 +1,9 @@
+# Build from a pinned, locally verified base and a clean Git archive.
+# This is an extension-asset release; the WebUI service image is unchanged.
+ARG ASSET_BASE_IMAGE
+FROM ${ASSET_BASE_IMAGE}
+WORKDIR /opt/plm-report-ui
+COPY hermes-config/webui-extensions/noah/noah-plm-panels.js ./
+COPY hermes-config/webui-extensions/noah/manifest.json ./
+COPY deploy/sync-plm-report-ui.sh ./
+ENTRYPOINT ["/bin/sh", "/opt/plm-report-ui/sync-plm-report-ui.sh"]

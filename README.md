@@ -171,3 +171,7 @@ cd ~/plm-hermes && ./deploy/update.sh
 正文生成规则在 `plm_agent/agent/patient_like_me/v1/rag/prompts.py` 的 `CLINICAL_VISUAL_OUTPUT_RULES`，覆盖病例快速问答、诊断/检查/治疗报告和报告追问。至少两个对象的多维度比较、至少三项检查/监测默认用 Markdown 表格；证据支持的条件分支或至少三步临床路径默认用 Mermaid 流程图。简单问题、证据不足、澄清和用户要求纯文字时不强行添加图表。
 
 WebUI 已支持这两种格式。调整出现频率应修改引擎的正文提示词；`hermes-config/SOUL.md` 和 `skills/plm/plm-quick/SKILL.md` 负责让 Hermes 原样保留返回的图表。完整报告正文由引擎直接生成，因此只修改 SOUL 不会改变报告排版。提示词提高的是合适场景下的生成倾向，不能保证每次都生成图表；Mermaid 显示还依赖有效语法和前端渲染库成功加载。
+
+报告分栏扩展在内容完成、切换到对应分区或恢复历史报告时调用 WebUI 的 Mermaid 绘图步骤。流式文本尚未完成时不反复绘图，以免下一批文本覆盖正在生成的 SVG。发布扩展时同时更新 `manifest.json` 的版本，页面刷新后会加载新资源。
+
+分栏扩展回归测试：在 `hermes-config/tests` 下运行 `npm ci && npm test`。测试执行真实分栏扩展和 Markdown 解析器，覆盖完成、分区切换、流式结束、停止和历史恢复；Mermaid 的实际 SVG 及布局仍需在浏览器中验证。仅更新该扩展时，可通过 `deploy/Dockerfile.plm-report-ui` 构建版本化资源镜像，再把现有扩展目录挂载为 `/target` 运行，其他扩展及用户状态保持原样。

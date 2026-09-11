@@ -52,6 +52,23 @@
         return '<div style="white-space:pre-wrap">' + esc(t) + "</div>";
     }
 
+    // renderMd creates Mermaid placeholders; drawing is a separate WebUI step.
+    // Run it after the active panel is attached. Do not start async drawing on
+    // every stream chunk, since the next chunk replaces that panel's HTML.
+    var diagramFrames = new WeakSet();
+    function queuePanelDiagrams(panel) {
+        if (!panel || panel.dataset.noahPlmStreaming === "1" || diagramFrames.has(panel)) return;
+        diagramFrames.add(panel);
+        requestAnimationFrame(function () {
+            diagramFrames.delete(panel);
+            if (!panel.isConnected || !panel.classList.contains("active") ||
+                panel.dataset.noahPlmStreaming === "1") return;
+            if (typeof window.renderMermaidBlocks === "function") {
+                window.renderMermaidBlocks(panel);
+            }
+        });
+    }
+
     // 分区正文首行(如"诊断建议及依据")本是纯文本, 提升为二级标题以突出层级。
     // 已是 markdown 标题/加粗/列表/表格或过长(像正文句子)的首行不动。
     function promoteTitle(text) {
@@ -59,7 +76,7 @@
         var nl = t.indexOf("\n");
         var first = (nl < 0 ? t : t.slice(0, nl)).trim();
         if (!first) return t;
-        if (/^#{1,6}\s/.test(first) || /^[*\-|>0-9]/.test(first) ||
+        if (/^(?:#{1,6}\s|```|~~~)/.test(first) || /^[*\-|>0-9]/.test(first) ||
             first.length > 24 || /[。,；;]/.test(first)) return t;
         return "## " + first + (nl < 0 ? "" : t.slice(nl));
     }
@@ -257,6 +274,7 @@
             var panel = document.createElement("div");
             panel.className = "noah-plm-panel";
             panel.setAttribute("data-label", tab.label);   // 打印时作分区标题
+            if (streaming) panel.dataset.noahPlmStreaming = "1";
             panelByKey[tab.key] = panel;
             btnByKey[tab.key] = btn;
             if (content && String(content).trim()) {
@@ -275,6 +293,7 @@
                 body.querySelectorAll(".noah-plm-panel").forEach(function (p) { p.classList.remove("active"); });
                 btn.classList.add("active");
                 panel.classList.add("active");
+                queuePanelDiagrams(panel);
             });
 
             tabsBar.appendChild(btn);
@@ -290,7 +309,10 @@
             btns.forEach(function (b) { b.classList.remove("active"); });
             panels.forEach(function (p) { p.classList.remove("active"); });
             if (btns[idx]) btns[idx].classList.add("active");
-            if (panels[idx]) panels[idx].classList.add("active");
+            if (panels[idx]) {
+                panels[idx].classList.add("active");
+                queuePanelDiagrams(panels[idx]);
+            }
         }
         activate(firstWithContent < 0 ? 0 : firstWithContent);
         return { panelByKey: panelByKey, btnByKey: btnByKey, activate: activate };
@@ -305,7 +327,10 @@
 
         function paint(tabKey) {
             var el = panelByKey[tabKey];
-            if (el) el.innerHTML = renderMd(promoteTitle(buffers[tabKey] || ""));
+            if (el) {
+                el.dataset.noahPlmStreaming = "1";
+                el.innerHTML = renderMd(promoteTitle(buffers[tabKey] || ""));
+            }
             if (ctx.btnByKey[tabKey]) ctx.btnByKey[tabKey].classList.add("noah-plm-tab-streaming");  // 该分区正在写入→亮脉冲点
             if (!activated) {
                 var idx = -1;
@@ -325,7 +350,9 @@
             try { es.close(); } catch (_) {}
             _finish();
             wrap.querySelectorAll("[class*=plm-panel]").forEach(function (p) {
+                delete p.dataset.noahPlmStreaming;
                 if (/生成中/.test(p.textContent || "")) p.innerHTML = '<div class="noah-plm-empty">已停止生成</div>';
+                queuePanelDiagrams(p);
             });
             wrap.querySelectorAll(".noah-plm-tab-streaming").forEach(function (b) { b.classList.remove("noah-plm-tab-streaming"); });
         } };
@@ -359,7 +386,11 @@
                 paint(tk);
             } else if (ev === "section_done") {
                 var tk2 = SEC2TAB[p.section];
-                if (tk2 && tk2 !== "comprehensive" && tk2 !== "drug") paint(tk2);
+                if (tk2 && tk2 !== "comprehensive" && tk2 !== "drug") {
+                    paint(tk2);
+                    delete panelByKey[tk2].dataset.noahPlmStreaming;
+                    queuePanelDiagrams(panelByKey[tk2]);
+                }
                 if (tk2 && ctx.btnByKey[tk2]) ctx.btnByKey[tk2].classList.remove("noah-plm-tab-streaming");  // 该分区写完→熄灭
             } else if (ev === "clarification_required") {
                 wrap.innerHTML = '<div class="noah-plm-empty">需要先确认澄清信息后再生成报告</div>';
@@ -455,6 +486,7 @@
             if (entry.wrap !== target && target.parentNode) {
                 target.parentNode.replaceChild(entry.wrap, target);
             }
+            queuePanelDiagrams(entry.wrap.querySelector(".noah-plm-panel.active"));
             return;
         }
         var wrap = document.createElement("div");
