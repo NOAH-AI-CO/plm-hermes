@@ -27,6 +27,7 @@ curl -s --max-time 200 -X POST http://plm-engine:8002/plm_evidence_based \
 
 ## 用完怎么做
 1. 把返回的 **`output` 原样作为普通聊天消息**呈现给用户(它是 markdown 正文,直接贴出来即可)。
+   - 保留正文中的 Markdown 表格、完整的 `mermaid` 代码围栏、图后说明和引用；不要改写成列表、删去流程图，或用一个外层代码块包住整段回答。图表内容由引擎依据指南生成，不自行补画或补写医学结论。
 2. ⛔ **不要**输出 ```plm-report 代码块(那是完整报告用的,会被前端渲成分栏)。快速问答就是普通 markdown 回答。
 3. ⛔ 不要存文件、不要 python 解析——直接取 `output` 字段贴出。
 4. 若 `output` 为空或返回 clarification_required:说明信息不足,简短向用户追问关键信息后再调。
