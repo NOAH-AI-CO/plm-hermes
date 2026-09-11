@@ -1,0 +1,17 @@
+# Incremental prompt release. The engine base must be an immutable, audited
+# snapshot of the active runtime, including host-specific compatibility fixes.
+# Record that base digest alongside the Git revision of this image.
+ARG PLM_ENGINE_BASE_IMAGE
+ARG PLM_WORKFLOW_BASE_IMAGE
+
+FROM ${PLM_ENGINE_BASE_IMAGE} AS engine
+WORKDIR /noah_agent
+COPY plm_agent/agent/patient_like_me/v1/rag/prompts.py agent/patient_like_me/v1/rag/prompts.py
+RUN python -m py_compile agent/patient_like_me/v1/rag/prompts.py
+
+FROM ${PLM_WORKFLOW_BASE_IMAGE} AS workflow
+WORKDIR /opt/plm-visual-update
+COPY hermes-config/SOUL.md SOUL.md
+COPY skills/plm/plm-quick/SKILL.md plm-quick-SKILL.md
+COPY deploy/sync-plm-visual-assets.sh sync-plm-visual-assets.sh
+ENTRYPOINT ["/bin/sh", "/opt/plm-visual-update/sync-plm-visual-assets.sh"]
